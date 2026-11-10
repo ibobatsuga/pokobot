@@ -33,6 +33,7 @@ import {
   ChevronDown,
   ChevronRight,
   Plus,
+  Brain,
 } from "lucide-react";
 
 interface MenuItem {
@@ -108,6 +109,11 @@ export const MENU_GROUPS: MenuGroup[] = [
   {
     groupTitle: "AI AUTOMATION",
     items: [
+      {
+        title: "Data Training AI",
+        href: "/app/auto-reply/finetunnel",
+        icon: Brain,
+      },
       {
         title: "Webhook Rules",
         href: "/app/webhook/rules",
