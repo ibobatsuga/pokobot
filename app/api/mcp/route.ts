@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+};
+
 // PokoBot Native MCP Tools Definition
 const POKOBOT_MCP_TOOLS = [
   {
@@ -129,103 +135,136 @@ const POKOBOT_MCP_TOOLS = [
   },
 ];
 
+// OPTIONS: Handle CORS Preflight
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: CORS_HEADERS,
+  });
+}
+
 // GET: Server info, schema & connection instructions for MCP clients
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const host = url.origin;
 
-  return NextResponse.json({
-    status: "ok",
-    server: {
-      name: "pokobot-mcp-server",
-      version: "1.0.0",
-      description: "Model Context Protocol (MCP) Server for PokoBot CRM & WAHA WhatsApp Engine",
-      provider: "FLUXY.ID",
-    },
-    endpoint: `${host}/api/mcp`,
-    tools: POKOBOT_MCP_TOOLS,
-    clientsConfig: {
-      claudeDesktop: {
-        instructions: "Tambahkan ke ~/Library/Application Support/Claude/claude_desktop_config.json",
-        config: {
-          mcpServers: {
-            pokobot: {
-              command: "npx",
-              args: [
-                "-y",
-                "@modelcontextprotocol/server-fetch",
-                `${host}/api/mcp`,
-              ],
+  return NextResponse.json(
+    {
+      status: "ok",
+      server: {
+        name: "pokobot-mcp-server",
+        version: "1.0.0",
+        description: "Model Context Protocol (MCP) Server for PokoBot CRM & WAHA WhatsApp Engine",
+        provider: "FLUXY.ID",
+      },
+      endpoint: `${host}/api/mcp`,
+      tools: POKOBOT_MCP_TOOLS,
+      clientsConfig: {
+        claudeDesktop: {
+          instructions: "Tambahkan ke ~/Library/Application Support/Claude/claude_desktop_config.json",
+          config: {
+            mcpServers: {
+              pokobot: {
+                command: "npx",
+                args: ["-y", "@modelcontextprotocol/server-fetch", `${host}/api/mcp`],
+                env: {
+                  POKOBOT_API_KEY: "pk_live_fluxy_pokobot_enterprise",
+                },
+              },
             },
           },
         },
-      },
-      cursor: {
-        instructions: "Tambahkan ke pengaturan Cursor MCP Settings atau .cursor/mcp.json",
-        config: {
-          mcpServers: {
-            pokobot: {
-              url: `${host}/api/mcp`,
+        cursor: {
+          instructions: "Tambahkan ke pengaturan Cursor MCP Settings atau .cursor/mcp.json",
+          config: {
+            mcpServers: {
+              pokobot: {
+                url: `${host}/api/mcp`,
+                headers: {
+                  Authorization: "Bearer pk_live_fluxy_pokobot_enterprise",
+                },
+              },
             },
           },
         },
-      },
-      antigravity: {
-        instructions: "Tambahkan ke Antigravity / Gemini Code Assist MCP Settings",
-        config: {
-          mcpServers: {
-            pokobot: {
-              url: `${host}/api/mcp`,
-              headers: {
-                Authorization: "Bearer pk_live_fluxy_pokobot_enterprise",
+        antigravity: {
+          instructions: "Tambahkan ke Antigravity / Gemini Code Assist MCP Settings",
+          config: {
+            mcpServers: {
+              pokobot: {
+                url: `${host}/api/mcp`,
+                headers: {
+                  Authorization: "Bearer pk_live_fluxy_pokobot_enterprise",
+                },
               },
             },
           },
         },
       },
     },
-  });
+    { headers: CORS_HEADERS }
+  );
 }
 
 // POST: JSON-RPC 2.0 MCP Request Handler
 export async function POST(request: Request) {
+  let body: any;
   try {
-    const authHeader = request.headers.get("authorization");
-    const body = await request.json();
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      {
+        jsonrpc: "2.0",
+        id: null,
+        error: {
+          code: -32700,
+          message: "Parse error: Invalid JSON payload",
+        },
+      },
+      { status: 400, headers: CORS_HEADERS }
+    );
+  }
 
-    const { jsonrpc = "2.0", id, method, params } = body;
+  const { jsonrpc = "2.0", id = 1, method, params } = body;
 
+  try {
     // 1. Initialize MCP Handshake
     if (method === "initialize") {
-      return NextResponse.json({
-        jsonrpc: "2.0",
-        id,
-        result: {
-          protocolVersion: "2024-11-05",
-          serverInfo: {
-            name: "pokobot-mcp-server",
-            version: "1.0.0",
-          },
-          capabilities: {
-            tools: {
-              listChanged: true,
+      return NextResponse.json(
+        {
+          jsonrpc: "2.0",
+          id,
+          result: {
+            protocolVersion: "2024-11-05",
+            serverInfo: {
+              name: "pokobot-mcp-server",
+              version: "1.0.0",
             },
-            resources: {},
-            prompts: {},
+            capabilities: {
+              tools: {
+                listChanged: true,
+              },
+              resources: {},
+              prompts: {},
+            },
           },
         },
-      });
+        { headers: CORS_HEADERS }
+      );
     }
 
     // 2. Tools List Request
     if (method === "tools/list") {
-      return NextResponse.json({
-        jsonrpc: "2.0",
-        id,
-        result: {
-          tools: POKOBOT_MCP_TOOLS,
+      return NextResponse.json(
+        {
+          jsonrpc: "2.0",
+          id,
+          result: {
+            tools: POKOBOT_MCP_TOOLS,
+          },
         },
-      });
+        { headers: CORS_HEADERS }
+      );
     }
 
     // 3. Tools Call Execution
@@ -236,22 +275,38 @@ export async function POST(request: Request) {
       switch (toolName) {
         case "pokobot_send_whatsapp_message": {
           const { phone, message, session = "default" } = toolArgs;
-          return NextResponse.json({
-            jsonrpc: "2.0",
-            id,
-            result: {
-              content: [
-                {
-                  type: "text",
-                  text: `[PokoBot WAHA] Pesan WhatsApp berhasil dikirim ke ${phone} via session '${session}': "${message}"`,
+          if (!phone || !message) {
+            return NextResponse.json(
+              {
+                jsonrpc: "2.0",
+                id,
+                error: {
+                  code: -32602,
+                  message: "Invalid params: 'phone' and 'message' are required arguments",
                 },
-              ],
+              },
+              { status: 400, headers: CORS_HEADERS }
+            );
+          }
+          return NextResponse.json(
+            {
+              jsonrpc: "2.0",
+              id,
+              result: {
+                content: [
+                  {
+                    type: "text",
+                    text: `[PokoBot WAHA] Pesan WhatsApp berhasil dikirim ke ${phone} via session '${session}': "${message}"`,
+                  },
+                ],
+              },
             },
-          });
+            { headers: CORS_HEADERS }
+          );
         }
 
         case "pokobot_get_chats": {
-          const limit = toolArgs.limit || 5;
+          const limit = Math.min(Number(toolArgs.limit) || 5, 50);
           const mockChats = [
             {
               id: "6281802731947@c.us",
@@ -279,22 +334,39 @@ export async function POST(request: Request) {
             },
           ].slice(0, limit);
 
-          return NextResponse.json({
-            jsonrpc: "2.0",
-            id,
-            result: {
-              content: [
-                {
-                  type: "text",
-                  text: JSON.stringify(mockChats, null, 2),
-                },
-              ],
+          return NextResponse.json(
+            {
+              jsonrpc: "2.0",
+              id,
+              result: {
+                content: [
+                  {
+                    type: "text",
+                    text: JSON.stringify(mockChats, null, 2),
+                  },
+                ],
+              },
             },
-          });
+            { headers: CORS_HEADERS }
+          );
         }
 
         case "pokobot_search_contacts": {
-          const query = (toolArgs.query || "").toLowerCase();
+          const query = String(toolArgs.query || "").toLowerCase();
+          if (!query) {
+            return NextResponse.json(
+              {
+                jsonrpc: "2.0",
+                id,
+                error: {
+                  code: -32602,
+                  message: "Invalid params: 'query' argument is required",
+                },
+              },
+              { status: 400, headers: CORS_HEADERS }
+            );
+          }
+
           const contacts = [
             { name: "Budi Santoso", phone: "+62 818-0273-1947", tag: "API Integration", city: "Jakarta Selatan" },
             { name: "Siti Rahma", phone: "+62 812-9988-7711", tag: "Paket Starter", city: "Bandung" },
@@ -306,66 +378,120 @@ export async function POST(request: Request) {
               c.tag.toLowerCase().includes(query)
           );
 
-          return NextResponse.json({
-            jsonrpc: "2.0",
-            id,
-            result: {
-              content: [
-                {
-                  type: "text",
-                  text: JSON.stringify(contacts, null, 2),
-                },
-              ],
+          return NextResponse.json(
+            {
+              jsonrpc: "2.0",
+              id,
+              result: {
+                content: [
+                  {
+                    type: "text",
+                    text: JSON.stringify(contacts, null, 2),
+                  },
+                ],
+              },
             },
-          });
+            { headers: CORS_HEADERS }
+          );
         }
 
         case "pokobot_update_crm_deal": {
           const { phone, stage, dealValue, notes } = toolArgs;
-          return NextResponse.json({
-            jsonrpc: "2.0",
-            id,
-            result: {
-              content: [
-                {
-                  type: "text",
-                  text: `[CRM Pipeline Updated] Kontak ${phone} berhasil dipindahkan ke stage '${stage}' dengan estimasi nilai '${dealValue || "N/A"}'. Catatan: ${notes || "Tidak ada catatan."}`,
+          if (!phone || !stage) {
+            return NextResponse.json(
+              {
+                jsonrpc: "2.0",
+                id,
+                error: {
+                  code: -32602,
+                  message: "Invalid params: 'phone' and 'stage' are required arguments",
                 },
-              ],
+              },
+              { status: 400, headers: CORS_HEADERS }
+            );
+          }
+
+          return NextResponse.json(
+            {
+              jsonrpc: "2.0",
+              id,
+              result: {
+                content: [
+                  {
+                    type: "text",
+                    text: `[CRM Pipeline Updated] Kontak ${phone} berhasil dipindahkan ke stage '${stage}' dengan estimasi nilai '${dealValue || "N/A"}'. Catatan: ${notes || "Tidak ada catatan."}`,
+                  },
+                ],
+              },
             },
-          });
+            { headers: CORS_HEADERS }
+          );
         }
 
         case "pokobot_trigger_broadcast": {
           const { campaignName, targetTag, messageTemplate } = toolArgs;
-          return NextResponse.json({
-            jsonrpc: "2.0",
-            id,
-            result: {
-              content: [
-                {
-                  type: "text",
-                  text: `[Broadcast Scheduled] Kampanye '${campaignName}' untuk segmen '${targetTag}' telah dimasukkan ke antrean pengiriman dengan proteksi interval acak anti-ban.`,
+          if (!campaignName || !targetTag || !messageTemplate) {
+            return NextResponse.json(
+              {
+                jsonrpc: "2.0",
+                id,
+                error: {
+                  code: -32602,
+                  message: "Invalid params: 'campaignName', 'targetTag', and 'messageTemplate' are required",
                 },
-              ],
+              },
+              { status: 400, headers: CORS_HEADERS }
+            );
+          }
+
+          return NextResponse.json(
+            {
+              jsonrpc: "2.0",
+              id,
+              result: {
+                content: [
+                  {
+                    type: "text",
+                    text: `[Broadcast Scheduled] Kampanye '${campaignName}' untuk segmen '${targetTag}' telah dimasukkan ke antrean pengiriman dengan proteksi interval acak anti-ban.`,
+                  },
+                ],
+              },
             },
-          });
+            { headers: CORS_HEADERS }
+          );
         }
 
         case "pokobot_query_knowledge_base": {
           const { question } = toolArgs;
-          return NextResponse.json({
-            jsonrpc: "2.0",
-            id,
-            result: {
-              content: [
-                {
-                  type: "text",
-                  text: `[PokoBot Knowledge Base Result for '${question}'] SOP Pengiriman: Gudang utama berlokasi di Gambir, Jakarta Pusat. Ekspedisi yang didukung: JNE, J&T, SiCepat, Anteraja. Pembayaran dapat melalui QRIS otomatis atau Transfer Bank BCA/Mandiri.`,
+          if (!question) {
+            return NextResponse.json(
+              {
+                jsonrpc: "2.0",
+                id,
+                error: {
+                  code: -32602,
+                  message: "Invalid params: 'question' argument is required",
                 },
-              ],
+              },
+              { status: 400, headers: CORS_HEADERS }
+            );
+          }
+
+          return NextResponse.json(
+            {
+              jsonrpc: "2.0",
+              id,
+              result: {
+                content: [
+                  {
+                    type: "text",
+                    text: `[PokoBot Knowledge Base Result for '${question}'] SOP Pengiriman: Gudang utama berlokasi di Gambir, Jakarta Pusat. Ekspedisi yang didukung: JNE, J&T, SiCepat, Anteraja. Pembayaran dapat melalui QRIS otomatis atau Transfer Bank BCA/Mandiri.`,
+                  },
+                ],
+              },
             },
-          });
+            { headers: CORS_HEADERS }
+          );
         }
 
         default:
@@ -378,28 +504,34 @@ export async function POST(request: Request) {
                 message: `Method atau tool '${toolName}' tidak ditemukan.`,
               },
             },
-            { status: 404 }
+            { status: 404, headers: CORS_HEADERS }
           );
       }
     }
 
     // 4. Ping Handshake
     if (method === "ping") {
-      return NextResponse.json({
-        jsonrpc: "2.0",
-        id,
-        result: {},
-      });
+      return NextResponse.json(
+        {
+          jsonrpc: "2.0",
+          id,
+          result: {},
+        },
+        { headers: CORS_HEADERS }
+      );
     }
 
-    return NextResponse.json({
-      jsonrpc: "2.0",
-      id,
-      error: {
-        code: -32600,
-        message: `Invalid Request: Method '${method}' tidak didukung.`,
+    return NextResponse.json(
+      {
+        jsonrpc: "2.0",
+        id,
+        error: {
+          code: -32600,
+          message: `Invalid Request: Method '${method}' tidak didukung.`,
+        },
       },
-    });
+      { status: 400, headers: CORS_HEADERS }
+    );
   } catch (error: any) {
     return NextResponse.json(
       {
@@ -410,7 +542,7 @@ export async function POST(request: Request) {
           message: error.message || "Internal server error on MCP handler",
         },
       },
-      { status: 500 }
+      { status: 500, headers: CORS_HEADERS }
     );
   }
 }
