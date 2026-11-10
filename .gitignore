@@ -16,7 +16,10 @@ qr.png
 # Dependencies
 /vendor/
 /node_modules/
+.next/
+.vercel/
 
 # OS Specific
 .DS_Store
 Thumbs.db
+.vercel

@@ -1,0 +1,25 @@
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Poko - AI Omnichannel CRM & WhatsApp Engine",
+  description: "Next-generation WhatsApp CRM and AI Assistant powered by WAHA & Sakelar AI",
+  manifest: "/manifest-omnichannel.json",
+  icons: {
+    icon: "/favicon.ico",
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="id">
+      <body className="bg-poko-canvas text-poko-charcoal antialiased selection:bg-poko-linen selection:text-poko-charcoal">
+        {children}
+      </body>
+    </html>
+  );
+}

@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.sessions
+storage
+vendor
+*.log
+qr.png
+.env*
