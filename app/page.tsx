@@ -505,9 +505,11 @@ export default function PokoDashboardPage() {
           <div className="rounded-3xl bg-white border border-poko-border p-7 flex flex-col justify-between shadow-card">
             <div>
               <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center">
-                  <Bot className="w-5 h-5" />
-                </div>
+                <img
+                  src="/logo.png"
+                  alt="PokoBot"
+                  className="w-10 h-10 rounded-full object-contain border border-stone-200 shadow-xs"
+                />
                 <span className="text-[11px] font-mono px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
                   Engine Aktif
                 </span>

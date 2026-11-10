@@ -213,6 +213,11 @@ export default function OmnichannelCrmPage() {
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
+            <img
+              src="/logo.png"
+              alt="PokoBot"
+              className="w-8 h-8 rounded-full object-contain shrink-0 border border-stone-200"
+            />
             <div>
               <h2 className="font-bold text-sm text-poko-charcoal leading-tight">PokoBot Chat</h2>
               <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
@@ -397,8 +402,12 @@ export default function OmnichannelCrmPage() {
                   }`}
                 >
                   {isBot && (
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-purple-700 mb-1">
-                      <Bot className="w-3 h-3" />
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-stone-800 mb-1">
+                      <img
+                        src="/logo.png"
+                        alt="PokoBot"
+                        className="w-3.5 h-3.5 rounded-full object-contain"
+                      />
                       <span>PokoBot AI</span>
                     </div>
                   )}

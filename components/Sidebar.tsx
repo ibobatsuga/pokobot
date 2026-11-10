@@ -227,9 +227,11 @@ export function Sidebar() {
       {/* Top Header Logo */}
       <div className="p-5 border-b border-poko-border shrink-0">
         <Link href="/app" className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-2xl bg-poko-charcoal text-white flex items-center justify-center font-bold text-lg shadow-sm">
-            P
-          </div>
+          <img
+            src="/logo.png"
+            alt="PokoBot"
+            className="w-9 h-9 rounded-full object-contain shrink-0 shadow-xs border border-stone-200"
+          />
           <div>
             <div className="font-bold text-base tracking-tight text-poko-charcoal leading-none">
               PokoBot

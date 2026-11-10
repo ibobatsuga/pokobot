@@ -6,7 +6,9 @@ export const metadata: Metadata = {
   description: "Next-generation WhatsApp CRM and AI Assistant by FLUXY.ID powered by WAHA & Advanced AI Engine",
   manifest: "/manifest-omnichannel.json",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
   },
 };
 
