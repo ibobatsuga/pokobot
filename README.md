@@ -1,9 +1,21 @@
-# Ping! Clone PoC (WAHA + Sakelar AI)
+# 🤖 Poko Bot & Omnichannel CRM (WAHA + Sakelar AI)
 
-Proof of Concept (PoC) duplikasi sistem Chatbot AI & WhatsApp CRM bergaya **Ping!**, dengan arsitektur modern:
+Duplikasi arsitektur WhatsApp CRM & AI Assistant bertenaga **Next.js 15**, **Tailwind CSS**, **WAHA (WhatsApp HTTP API)**, dan **Sakelar AI (GPT-6 Luna)** dengan desain **Ronas IT Warm Minimalist**.
+
+---
+
+## 🌐 Live Production Deployments (Vercel)
+- **Poko CRM Dashboard**: [https://ping-clone-poc.vercel.app](https://ping-clone-poc.vercel.app)
+- **Standalone Omnichannel Chat App**: [https://ping-clone-poc.vercel.app/app/omnichannel-crm](https://ping-clone-poc.vercel.app/app/omnichannel-crm)
+- **GitHub Repository**: [https://github.com/ibobatsuga/pokobot.git](https://github.com/ibobatsuga/pokobot.git)
+- **Vercel Team**: `fluxyid (FLUXY)`
+
+---
+
 * **WhatsApp Engine:** Menggunakan **WAHA** (WhatsApp HTTP API via Docker) menggantikan Baileys custom & Meta WABA.
-* **AI Model Gateway:** Menggunakan **Sakelar AI** (`https://api.sakelar.ai/v1`) untuk akses fleksibel ke DeepSeek, GPT-4o, Claude 3.5, dan Gemini.
-* **Backend:** PHP 8+ dengan Webhook pipeline event-driven.
+* **AI Model Gateway:** Menggunakan **Sakelar AI** (`https://api.sakelar.web.id/v1`) dengan model `openai/gpt-6-luna`.
+* **Frontend:** Next.js 15, React 19, Tailwind CSS (Ronas IT Design System).
+* **Backend:** Next.js Serverless API (`/api/webhook`, `/api/status`) & PHP Engine.
 
 ---
 
