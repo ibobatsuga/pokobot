@@ -120,7 +120,7 @@ export default function OmnichannelCrmPage() {
       stage: "Deal Closed / Won",
       botActive: false,
       dealValue: "Rp 38.000.000",
-      intent: "Verifikasi integrasi engine WAHA & Sakelar AI",
+      intent: "Verifikasi integrasi engine WAHA & AI Engine",
       sentiment: "Owner / Internal",
       messages: [
         {
@@ -180,12 +180,12 @@ export default function OmnichannelCrmPage() {
     setInputMessage(text);
   };
 
-  // AI Suggestion generator using Sakelar AI Luna mock/live
+  // AI Suggestion generator
   const handleGenerateAiSuggestion = () => {
     setIsGeneratingAi(true);
     setTimeout(() => {
       setInputMessage(
-        "Tentu Pak Hendro, untuk paket Enterprise 10.000 broadcast sudah mencakup dedicated WAHA instance, unlimited agent seat, dan kuota Sakelar GPT-6 Luna. Saya kirimkan proposal PDF lengkapnya ya!"
+        "Tentu Pak Hendro, untuk paket Enterprise 10.000 broadcast sudah mencakup dedicated WAHA instance, unlimited agent seat, dan kuota PokoBot AI Engine. Saya kirimkan proposal PDF lengkapnya ya!"
       );
       setIsGeneratingAi(false);
     }, 600);
@@ -399,7 +399,7 @@ export default function OmnichannelCrmPage() {
                   {isBot && (
                     <div className="flex items-center gap-1 text-[10px] font-bold text-purple-700 mb-1">
                       <Bot className="w-3 h-3" />
-                      <span>PokoBot AI (gpt-6-luna)</span>
+                      <span>PokoBot AI</span>
                     </div>
                   )}
                   {msg.sender === "agent" && (
@@ -519,7 +519,7 @@ export default function OmnichannelCrmPage() {
                 <Sparkles className="w-3 h-3 text-purple-600" />
                 AI Memory Insight
               </h4>
-              <span className="text-[10px] font-mono text-purple-600 font-semibold">gpt-6-luna</span>
+              <span className="text-[10px] font-mono text-purple-600 font-semibold">AI Assistant</span>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-poko-linen border border-stone-300/60 space-y-2.5 text-xs">

@@ -70,7 +70,7 @@ export default function PokoDashboardPage() {
           tagColor: "bg-amber-50 text-amber-700 border-amber-200",
           value: "Rp 8.700.000",
           time: "2 jam lalu",
-          summary: "Menyediakan FAQ katalog produk skincare via GPT-6 Luna.",
+          summary: "Menyediakan FAQ katalog produk skincare via PokoBot AI.",
           dark: false,
         },
       ],
@@ -225,13 +225,13 @@ export default function PokoDashboardPage() {
                   <Bot className="w-5 h-5" />
                 </div>
                 <span className="text-[11px] font-mono px-2 py-1 rounded-md bg-stone-100 text-stone-600">
-                  gpt-6-luna
+                  AI Active
                 </span>
               </div>
 
               <h3 className="font-bold text-base text-poko-charcoal">PokoBot AI Engine</h3>
               <p className="text-xs text-stone-500 mt-1">
-                Didukung Sakelar AI Gateway dengan proteksi self-chat loop & filter grup anti-spam.
+                Didukung AI Engine cerdas dengan proteksi self-chat loop & filter grup anti-spam.
               </p>
 
               <div className="mt-5 space-y-3">

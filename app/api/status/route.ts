@@ -9,8 +9,8 @@ export async function GET() {
       whatsapp: "WAHA (WhatsApp HTTP API)",
       session: "default",
       connected_number: "+6289637370000",
-      ai_provider: "Sakelar AI Gateway",
-      ai_model: "openai/gpt-6-luna",
+      ai_provider: "PokoBot AI Engine",
+      ai_model: "pokobot-v1-intelligence",
       auto_reply_enabled: false,
       safety: {
         whitelist_enforced: true,

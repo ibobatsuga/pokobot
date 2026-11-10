@@ -56,7 +56,7 @@ export default function BillingPage() {
             </span>
             <h2 className="text-3xl font-bold text-poko-charcoal">Rp 1.450.000</h2>
             <p className="text-xs text-stone-600 mt-1">
-              Cukup untuk estimasi ~14.500 respons AI Sakelar GPT-6 Luna
+              Cukup untuk estimasi ~14.500 respons PokoBot AI
             </p>
           </div>
 

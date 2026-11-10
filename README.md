@@ -1,6 +1,6 @@
 # PokoBot by FLUXY.ID (WhatsApp CRM & AI Bot)
 
-Solusi WhatsApp CRM & AI Assistant bertenaga **Next.js 15**, **Tailwind CSS**, **WAHA (WhatsApp HTTP API)**, dan **Sakelar AI (GPT-6 Luna)** dengan desain **Ronas IT Warm Minimalist**.
+Solusi WhatsApp CRM & AI Assistant bertenaga **Next.js 15**, **Tailwind CSS**, **WAHA (WhatsApp HTTP API)**, dan **PokoBot AI Engine** dengan desain **Ronas IT Warm Minimalist**.
 
 ---
 
@@ -13,7 +13,7 @@ Solusi WhatsApp CRM & AI Assistant bertenaga **Next.js 15**, **Tailwind CSS**, *
 ---
 
 * **WhatsApp Engine:** Menggunakan **WAHA** (WhatsApp HTTP API via Docker) menggantikan Baileys custom & Meta WABA.
-* **AI Model Gateway:** Menggunakan **Sakelar AI** (`https://api.sakelar.web.id/v1`) dengan model `openai/gpt-6-luna`.
+* **AI Model Gateway:** Menggunakan **PokoBot AI Engine** terintegrasi LLM dengan kemampuan kualifikasi prospek otomatis.
 * **Frontend:** Next.js 15, React 19, Tailwind CSS (Ronas IT Design System).
 * **Backend:** Next.js Serverless API (`/api/webhook`, `/api/status`) & PHP Engine.
 

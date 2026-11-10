@@ -49,9 +49,9 @@ export default function TodoListPage() {
       dueDate: "Hari Ini",
       dueTime: "16:30",
       priority: "Sedang",
-      assignedTo: "Poko AI (Luna)",
+      assignedTo: "PokoBot AI",
       completed: false,
-      notes: "Contoh respon GPT-6 Luna dengan persona ramah & emoji.",
+      notes: "Contoh respon PokoBot AI dengan persona ramah & profesional.",
     },
     {
       id: "t3",

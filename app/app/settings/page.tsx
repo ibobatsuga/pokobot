@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const [sakelarKey, setSakelarKey] = useState("sk_sakelar_live_********************");
-  const [sakelarBaseUrl, setSakelarBaseUrl] = useState("https://api.sakelar.web.id/v1");
-  const [selectedModel, setSelectedModel] = useState("openai/gpt-6-luna");
+  const [aiKey, setAiKey] = useState("sk_live_********************");
+  const [aiBaseUrl, setAiBaseUrl] = useState("https://api.openai.com/v1");
+  const [selectedModel, setSelectedModel] = useState("gpt-4o");
   const [wahaBaseUrl, setWahaBaseUrl] = useState("http://localhost:3000");
   const [whitelistInput, setWhitelistInput] = useState("6281802731947, 6281226300090, 6289637370000");
   const [saved, setSaved] = useState(false);
@@ -29,16 +29,16 @@ export default function SettingsPage() {
   return (
     <PokoAppShell
       title="Setting Aplikasi & Gateway API"
-      subtitle="Konfigurasi integrasi Sakelar AI, Docker WAHA Endpoint, dan parameter keamanan whitelist"
+      subtitle="Konfigurasi integrasi AI Engine, Docker WAHA Endpoint, dan parameter keamanan whitelist"
     >
       <form onSubmit={handleSave} className="max-w-3xl space-y-6">
-        {/* Sakelar AI Config */}
+        {/* AI Config */}
         <div className="p-6 rounded-3xl bg-white border border-poko-border shadow-subtle space-y-4">
           <div className="flex items-center gap-2.5 pb-3 border-b border-stone-100">
             <Cpu className="w-5 h-5 text-purple-600" />
             <div>
-              <h3 className="font-bold text-sm text-poko-charcoal">Sakelar AI Gateway</h3>
-              <p className="text-xs text-stone-500">Pusat engine kecerdasan buatan untuk Poko Bot</p>
+              <h3 className="font-bold text-sm text-poko-charcoal">PokoBot AI Engine Gateway</h3>
+              <p className="text-xs text-stone-500">Pusat engine kecerdasan buatan untuk PokoBot</p>
             </div>
           </div>
 
@@ -49,8 +49,8 @@ export default function SettingsPage() {
               </label>
               <input
                 type="text"
-                value={sakelarBaseUrl}
-                onChange={(e) => setSakelarBaseUrl(e.target.value)}
+                value={aiBaseUrl}
+                onChange={(e) => setAiBaseUrl(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-mono text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
               />
             </div>
@@ -62,8 +62,8 @@ export default function SettingsPage() {
               <div className="relative">
                 <input
                   type="password"
-                  value={sakelarKey}
-                  onChange={(e) => setSakelarKey(e.target.value)}
+                  value={aiKey}
+                  onChange={(e) => setAiKey(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-mono text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
                 />
                 <Lock className="w-3.5 h-3.5 text-stone-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
@@ -79,9 +79,9 @@ export default function SettingsPage() {
                 onChange={(e) => setSelectedModel(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
               >
-                <option value="openai/gpt-6-luna">openai/gpt-6-luna (Direkomendasikan - Tercepat & Paling Cerdas)</option>
-                <option value="deepseek/deepseek-chat">deepseek/deepseek-chat</option>
-                <option value="anthropic/claude-3-5-sonnet">anthropic/claude-3-5-sonnet</option>
+                <option value="gpt-4o">GPT-4o (Direkomendasikan - Tercepat & Paling Cerdas)</option>
+                <option value="deepseek-chat">DeepSeek Chat</option>
+                <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
               </select>
             </div>
           </div>

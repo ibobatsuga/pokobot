@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "PokoBot by FLUXY.ID - AI WhatsApp Automation & CRM",
-  description: "Next-generation WhatsApp CRM and AI Assistant by FLUXY.ID powered by WAHA & Sakelar AI",
+  description: "Next-generation WhatsApp CRM and AI Assistant by FLUXY.ID powered by WAHA & Advanced AI Engine",
   manifest: "/manifest-omnichannel.json",
   icons: {
     icon: "/favicon.ico",

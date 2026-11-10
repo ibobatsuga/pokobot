@@ -19,7 +19,7 @@ export default function LogReportsPage() {
     {
       id: "log-101",
       time: "10 Nov 2026, 13:15:22",
-      type: "AI Bot (gpt-6-luna)",
+      type: "PokoBot AI",
       recipient: "+62 812-2630-0090",
       content: "Halo Pak Hendro! Selamat datang di Poko. Kami menyediakan solusi CRM...",
       status: "READ",

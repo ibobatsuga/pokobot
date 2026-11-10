@@ -21,10 +21,10 @@ export default function TutorialPage() {
     },
     {
       id: "tut-2",
-      title: "Setup Sakelar AI Gateway dengan Model GPT-6 Luna",
+      title: "Setup AI Gateway & Konfigurasi Bot WhatsApp",
       duration: "06:30",
       category: "AI & Otomasi",
-      desc: "Cara mengisi API key Sakelar, mengatur prompt sistem kepribadian bot, dan mengaktifkan fitur whitelist nomor ramah.",
+      desc: "Cara mengisi API key AI, mengatur prompt sistem kepribadian bot, dan mengaktifkan fitur whitelist nomor ramah.",
     },
     {
       id: "tut-3",

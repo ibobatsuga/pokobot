@@ -16,9 +16,9 @@ export default function WebhookRulesPage() {
   const [rules, setRules] = useState([
     {
       id: "wh-1",
-      name: "Poko AI Auto-Responder (Sakelar Luna)",
+      name: "PokoBot AI Auto-Responder",
       event: "message.any (Inbound Private)",
-      targetUrl: "https://api.sakelar.web.id/v1/chat/completions",
+      targetUrl: "https://api.pokobot.fluxy.id/v1/chat/completions",
       method: "POST",
       status: "Aktif",
       retries: 3,
