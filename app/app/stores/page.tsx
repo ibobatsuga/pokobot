@@ -81,11 +81,11 @@ export default function StoresContactsPage() {
       subtitle="Manajemen repositori kontak WhatsApp, segmentasi tag, dan riwayat transaksi"
       actionButton={
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-poko-border bg-white text-xs font-semibold text-stone-700 hover:bg-stone-50">
+          <button className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl border border-poko-border bg-white text-xs font-semibold text-stone-700 hover:bg-stone-50">
             <Upload className="w-3.5 h-3.5" />
             <span>Import CSV</span>
           </button>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
+          <button className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
             <Plus className="w-3.5 h-3.5" />
             <span>Tambah Kontak</span>
           </button>

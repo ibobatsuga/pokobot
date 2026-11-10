@@ -47,7 +47,7 @@ export default function KeywordGuardsPage() {
       title="Keyword Guard & Auto-Trigger"
       subtitle="Deteksi otomatis kata kunci percakapan untuk memberi tag otomatis, memicu pesan template, atau mematikan AI bot saat ada keluhan"
       actionButton={
-        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
+        <button className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
           <Plus className="w-3.5 h-3.5" />
           <span>Tambah Keyword Guard</span>
         </button>

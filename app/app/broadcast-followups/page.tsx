@@ -66,7 +66,7 @@ export default function UpsellingCampaignPage() {
       title="Upselling Campaign & Auto Follow-up"
       subtitle="Rangkaian pesan berkala (drip campaign) otomatis untuk meningkatkan Lifetime Value (LTV) pelanggan"
       actionButton={
-        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
+        <button className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
           <Plus className="w-3.5 h-3.5" />
           <span>Buat Campaign Baru</span>
         </button>

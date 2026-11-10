@@ -40,7 +40,7 @@ export default function MasterTemplatePage() {
       title="Master Template Pesan"
       subtitle="Koleksi template pesan WhatsApp baku dengan parameter dinamis untuk kebutuhan API & broadcast"
       actionButton={
-        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
+        <button className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
           <Plus className="w-3.5 h-3.5" />
           <span>Buat Template Baru</span>
         </button>

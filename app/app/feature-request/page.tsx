@@ -53,7 +53,7 @@ export default function FeatureRequestPage() {
       title="Request Fitur & Feedback Pengguna"
       subtitle="Beri masukan fitur baru untuk Poko Omnichannel CRM dan vote ide-ide terbaik dari komunitas"
       actionButton={
-        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
+        <button className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
           <Plus className="w-3.5 h-3.5" />
           <span>Kirim Ide Fitur Baru</span>
         </button>

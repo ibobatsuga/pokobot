@@ -47,7 +47,7 @@ export default function MediaManagerPage() {
       title="Media Manager"
       subtitle="Pusat penyimpanan berkas gambar, katalog PDF, dan audio voice note untuk broadcast & bot WhatsApp"
       actionButton={
-        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
+        <button className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
           <Upload className="w-3.5 h-3.5" />
           <span>Upload Media Baru</span>
         </button>

@@ -36,24 +36,28 @@ export function PokoAppShell({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {/* Search */}
             <div className="relative hidden md:block">
               <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Cari kontak, pesan, kampanye..."
-                className="pl-8 pr-4 py-1.5 w-60 rounded-xl text-xs bg-stone-100 border-none focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
+                className="pl-8 pr-4 h-9 w-60 rounded-xl text-xs bg-stone-100 border-none focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
               />
             </div>
 
             {/* Custom Page Action Button (if provided) */}
-            {actionButton}
+            {actionButton && (
+              <div className="flex items-center gap-2 [&_button]:h-9 [&_a]:h-9">
+                {actionButton}
+              </div>
+            )}
 
             {/* Quick Link to Standalone CRM Chat App */}
             <Link
               href="/app/omnichannel-crm"
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-poko-charcoal text-white hover:bg-black transition-all shadow-xs shrink-0"
+              className="h-9 flex items-center gap-2 px-3.5 rounded-xl text-xs font-semibold bg-poko-charcoal text-white hover:bg-black transition-all shadow-xs shrink-0"
             >
               <span>CRM Chat App</span>
               <ExternalLink className="w-3.5 h-3.5" />

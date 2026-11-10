@@ -34,7 +34,7 @@ export default function WhatsappDevicePage() {
       title="Whatsapp Device Manager"
       subtitle="Kelola koneksi perangkat WhatsApp multi-device bertenaga WAHA Docker Engine"
       actionButton={
-        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
+        <button className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all">
           <Plus className="w-3.5 h-3.5" />
           <span>Tambah Device Baru</span>
         </button>
