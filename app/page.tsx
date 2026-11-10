@@ -2,34 +2,20 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { PokoAppShell } from "@/components/PokoAppShell";
 import {
-  MessageSquare,
-  Users,
-  Send,
-  Cpu,
-  Settings,
-  Flame,
-  Search,
-  Bell,
-  CheckCircle2,
-  Phone,
-  ArrowUpRight,
-  Sparkles,
-  Bot,
-  ExternalLink,
-  Kanban,
-  MoreVertical,
-  Calendar,
-  Layers,
-  ShieldCheck,
   TrendingUp,
+  Bot,
+  Kanban,
+  MessageSquare,
+  Sparkles,
+  ExternalLink,
+  Plus,
 } from "lucide-react";
 
-export default function PokoDashboard() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+export default function PokoDashboardPage() {
   const [autoReplyEnabled, setAutoReplyEnabled] = useState(false);
 
-  // Mock pipeline data
   const pipelineStages = [
     {
       title: "New Inquiries",
@@ -128,440 +114,273 @@ export default function PokoDashboard() {
   ];
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-poko-canvas">
-      {/* 1. LEFT SIDEBAR */}
-      <aside className="w-64 flex flex-col border-r border-poko-border bg-white px-5 py-6 justify-between select-none shrink-0">
-        <div>
-          {/* Brand Logo */}
-          <div className="flex items-center gap-3 px-2 mb-8">
-            <div className="w-9 h-9 rounded-2xl bg-poko-charcoal text-white flex items-center justify-center font-bold text-lg shadow-sm">
-              P
+    <PokoAppShell
+      title="Dashboard Stats"
+      subtitle="Ringkasan performa penjualan, pipeline CRM, dan bot otomatisasi AI"
+    >
+      <div className="space-y-8">
+        {/* HERO KPI SECTION: Ronas IT Warm Minimalist Card */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left 2 Cols: Linen Card with Radial Gauge & Charts */}
+          <div className="lg:col-span-2 rounded-3xl bg-poko-linen border border-stone-200/60 p-7 flex flex-col justify-between shadow-subtle relative overflow-hidden">
+            <div className="flex items-start justify-between relative z-10">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 border border-stone-200 text-xs font-semibold text-stone-700 mb-3">
+                  <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+                  Target Penjualan Bulan Ini
+                </div>
+                <h2 className="text-3xl font-bold tracking-tight text-poko-charcoal">
+                  Rp 142.800.000
+                </h2>
+                <p className="text-xs text-stone-600 mt-1">
+                  Dari target total Rp 180.000.000 (November 2026)
+                </p>
+              </div>
+
+              {/* Semicircular Radial Gauge */}
+              <div className="flex flex-col items-center">
+                <div className="relative w-36 h-20 flex items-end justify-center overflow-hidden">
+                  <svg className="w-36 h-36 transform -rotate-180" viewBox="0 0 100 100">
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      fill="transparent"
+                      stroke="#e2e3d5"
+                      strokeWidth="10"
+                      strokeDasharray="251.2"
+                      strokeDashoffset="125.6"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      fill="transparent"
+                      stroke="#1f1f1f"
+                      strokeWidth="10"
+                      strokeDasharray="251.2"
+                      strokeDashoffset="153.2"
+                      strokeLinecap="round"
+                      className="transition-all duration-1000 ease-out"
+                    />
+                  </svg>
+                  <div className="absolute bottom-1 text-center">
+                    <span className="text-2xl font-bold text-poko-charcoal">78%</span>
+                  </div>
+                </div>
+                <span className="text-[11px] font-medium text-stone-500 mt-1">Goal Reached</span>
+              </div>
             </div>
-            <div>
-              <div className="font-bold text-lg tracking-tight text-poko-charcoal flex items-center gap-1.5">
-                Poko
-                <span className="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded-full bg-poko-linen text-poko-charcoal border border-stone-200">
-                  AI CRM
+
+            {/* Striped / Solid Activity Bars (Ronas IT Design Signature) */}
+            <div className="mt-8 pt-6 border-t border-stone-300/40 relative z-10">
+              <div className="flex items-center justify-between text-xs text-stone-600 mb-3">
+                <span className="font-semibold text-poko-charcoal">
+                  Aktivitas Percakapan Harian
                 </span>
-              </div>
-              <p className="text-xs text-stone-400">by Team FLUXY</p>
-            </div>
-          </div>
-
-          {/* Navigation Items */}
-          <nav className="space-y-1.5">
-            <button
-              onClick={() => setActiveTab("dashboard")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                activeTab === "dashboard"
-                  ? "bg-poko-linen text-poko-charcoal shadow-sm"
-                  : "text-stone-600 hover:bg-stone-50"
-              }`}
-            >
-              <Kanban className="w-4 h-4 text-poko-charcoal" />
-              Pipeline & Dashboard
-            </button>
-
-            <Link
-              href="/app/omnichannel-crm"
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-stone-700 hover:bg-poko-linen/70 transition-all group"
-            >
-              <div className="flex items-center gap-3">
-                <MessageSquare className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
-                <span>Omnichannel CRM</span>
-              </div>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 animate-pulse">
-                Live
-              </span>
-            </Link>
-
-            <button
-              onClick={() => setActiveTab("contacts")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                activeTab === "contacts"
-                  ? "bg-poko-linen text-poko-charcoal"
-                  : "text-stone-600 hover:bg-stone-50"
-              }`}
-            >
-              <Users className="w-4 h-4" />
-              Kontak & Pelanggan
-            </button>
-
-            <button
-              onClick={() => setActiveTab("broadcast")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                activeTab === "broadcast"
-                  ? "bg-poko-linen text-poko-charcoal"
-                  : "text-stone-600 hover:bg-stone-50"
-              }`}
-            >
-              <Send className="w-4 h-4" />
-              Broadcast Campaign
-            </button>
-
-            <button
-              onClick={() => setActiveTab("ai-agent")}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                activeTab === "ai-agent"
-                  ? "bg-poko-linen text-poko-charcoal"
-                  : "text-stone-600 hover:bg-stone-50"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Cpu className="w-4 h-4 text-purple-600" />
-                <span>Sakelar AI Engine</span>
-              </div>
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            </button>
-
-            <button
-              onClick={() => setActiveTab("settings")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                activeTab === "settings"
-                  ? "bg-poko-linen text-poko-charcoal"
-                  : "text-stone-600 hover:bg-stone-50"
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-              Pengaturan & API
-            </button>
-          </nav>
-        </div>
-
-        {/* Bottom Profile & Connection Status */}
-        <div className="space-y-4 pt-4 border-t border-poko-border">
-          {/* Connected Device Card */}
-          <div className="p-3 rounded-2xl bg-stone-50 border border-stone-200/80">
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="font-semibold text-stone-700 flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                WA Connected
-              </span>
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-            </div>
-            <div className="text-xs font-mono text-stone-900 font-medium">
-              +62 896-3737-0000
-            </div>
-            <div className="text-[11px] text-stone-400 mt-0.5">WAHA Docker Session</div>
-          </div>
-
-          {/* User profile */}
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-poko-charcoal text-white flex items-center justify-center font-semibold text-xs">
-                IA
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-poko-charcoal leading-none">Ibob Atsuga</p>
-                <p className="text-[11px] text-stone-400 mt-1">Super Admin • Fluxy</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* 2. MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col overflow-y-auto">
-        {/* Header Bar */}
-        <header className="h-16 border-b border-poko-border bg-white/80 backdrop-blur-md px-8 flex items-center justify-between sticky top-0 z-20">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-lg font-bold text-poko-charcoal tracking-tight">
-                Poko Workspace
-              </h1>
-              <p className="text-xs text-stone-500">Overview performa pipeline dan AI bot</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Search */}
-            <div className="relative">
-              <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Cari kontak, leads, transaksi..."
-                className="pl-9 pr-4 py-2 w-64 rounded-xl text-xs bg-stone-100 border-none focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
-              />
-            </div>
-
-            {/* Quick Link to Standalone PWA */}
-            <Link
-              href="/app/omnichannel-crm"
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-poko-charcoal text-white hover:bg-black transition-all shadow-sm"
-            >
-              <span>Buka Chat App</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </header>
-
-        {/* Scrollable Dashboard Body */}
-        <div className="p-8 space-y-8">
-          {/* HERO KPI SECTION: Ronas IT Warm Minimalist Card */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left 2 Cols: Linen Card with Radial Gauge & Charts */}
-            <div className="lg:col-span-2 rounded-3xl bg-poko-linen border border-stone-200/60 p-7 flex flex-col justify-between shadow-subtle relative overflow-hidden">
-              <div className="flex items-start justify-between relative z-10">
-                <div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 border border-stone-200 text-xs font-semibold text-stone-700 mb-3">
-                    <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
-                    Target Penjualan Bulan Ini
-                  </div>
-                  <h2 className="text-3xl font-bold tracking-tight text-poko-charcoal">
-                    Rp 142.800.000
-                  </h2>
-                  <p className="text-xs text-stone-600 mt-1">
-                    Dari target total Rp 180.000.000 (November 2026)
-                  </p>
-                </div>
-
-                {/* Semicircular Radial Gauge */}
-                <div className="flex flex-col items-center">
-                  <div className="relative w-36 h-20 flex items-end justify-center overflow-hidden">
-                    <svg className="w-36 h-36 transform -rotate-180" viewBox="0 0 100 100">
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="40"
-                        fill="transparent"
-                        stroke="#e2e3d5"
-                        strokeWidth="10"
-                        strokeDasharray="251.2"
-                        strokeDashoffset="125.6"
-                      />
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="40"
-                        fill="transparent"
-                        stroke="#1f1f1f"
-                        strokeWidth="10"
-                        strokeDasharray="251.2"
-                        strokeDashoffset="153.2"
-                        strokeLinecap="round"
-                        className="transition-all duration-1000 ease-out"
-                      />
-                    </svg>
-                    <div className="absolute bottom-1 text-center">
-                      <span className="text-2xl font-bold text-poko-charcoal">78%</span>
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-medium text-stone-500 mt-1">Goal Reached</span>
-                </div>
-              </div>
-
-              {/* Striped / Solid Activity Bars (Ronas IT Design Signature) */}
-              <div className="mt-8 pt-6 border-t border-stone-300/40 relative z-10">
-                <div className="flex items-center justify-between text-xs text-stone-600 mb-3">
-                  <span className="font-semibold text-poko-charcoal">Aktivitas Percakapan Harian</span>
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-sm bg-poko-charcoal"></span> AI Handled
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-sm bg-stone-300"></span> Human Agent
-                    </span>
-                  </div>
-                </div>
-
-                {/* Bars */}
-                <div className="grid grid-cols-7 gap-3 items-end h-24">
-                  {[
-                    { day: "Sen", ai: 65, human: 20 },
-                    { day: "Sel", ai: 85, human: 15 },
-                    { day: "Rab", ai: 92, human: 25 },
-                    { day: "Kam", ai: 78, human: 30 },
-                    { day: "Jum", ai: 110, human: 40 },
-                    { day: "Sab", ai: 50, human: 10 },
-                    { day: "Min", ai: 45, human: 5 },
-                  ].map((bar, i) => (
-                    <div key={i} className="flex flex-col items-center gap-1.5 h-full justify-end">
-                      <div className="w-full flex items-end justify-center gap-1">
-                        <div
-                          style={{ height: `${(bar.ai / 120) * 80}px` }}
-                          className="w-4 rounded-t-md bg-poko-charcoal transition-all hover:opacity-80"
-                        ></div>
-                        <div
-                          style={{ height: `${(bar.human / 120) * 80}px` }}
-                          className="w-4 rounded-t-md bg-stone-300 transition-all hover:opacity-80"
-                        ></div>
-                      </div>
-                      <span className="text-[10px] text-stone-500 font-medium">{bar.day}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Right 1 Col: AI Bot Control & Safety Switch */}
-            <div className="rounded-3xl bg-white border border-poko-border p-7 flex flex-col justify-between shadow-card">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center">
-                    <Bot className="w-5 h-5" />
-                  </div>
-                  <span className="text-[11px] font-mono px-2 py-1 rounded-md bg-stone-100 text-stone-600">
-                    gpt-6-luna
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-poko-charcoal"></span> AI Handled
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-stone-300"></span> Human Agent
                   </span>
                 </div>
-
-                <h3 className="font-bold text-base text-poko-charcoal">Poko AI Engine</h3>
-                <p className="text-xs text-stone-500 mt-1">
-                  Didukung Sakelar AI Gateway dengan proteksi self-chat loop & filter grup anti-spam.
-                </p>
-
-                <div className="mt-5 space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-stone-50 border border-stone-200/70">
-                    <span className="text-xs font-medium text-stone-700">Auto-Reply Status</span>
-                    <button
-                      onClick={() => setAutoReplyEnabled(!autoReplyEnabled)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                        autoReplyEnabled ? "bg-emerald-600" : "bg-stone-300"
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          autoReplyEnabled ? "translate-x-6" : "translate-x-1"
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-xs text-stone-600 space-y-1.5">
-                    <div className="flex justify-between">
-                      <span className="text-stone-400">Target WhatsApp:</span>
-                      <span className="font-semibold text-stone-800">089637370000</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-stone-400">Response Speed:</span>
-                      <span className="font-semibold text-emerald-600">1.2 detik (Streaming)</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-stone-400">Whitelist Safety:</span>
-                      <span className="font-semibold text-stone-800">3 Nomor Terverifikasi</span>
-                    </div>
-                  </div>
-                </div>
               </div>
 
-              <div className="pt-4 border-t border-poko-border">
-                <Link
-                  href="/app/omnichannel-crm"
-                  className="w-full py-2.5 px-4 rounded-xl bg-poko-linen text-poko-charcoal font-semibold text-xs flex items-center justify-center gap-2 hover:bg-stone-200 transition-all border border-stone-300/60"
-                >
-                  <MessageSquare className="w-4 h-4 text-emerald-600" />
-                  Masuk ke Live Chat Omnichannel
-                </Link>
+              {/* Bars */}
+              <div className="grid grid-cols-7 gap-3 items-end h-24">
+                {[
+                  { day: "Sen", ai: 65, human: 20 },
+                  { day: "Sel", ai: 85, human: 15 },
+                  { day: "Rab", ai: 92, human: 25 },
+                  { day: "Kam", ai: 78, human: 30 },
+                  { day: "Jum", ai: 110, human: 40 },
+                  { day: "Sab", ai: 50, human: 10 },
+                  { day: "Min", ai: 45, human: 5 },
+                ].map((bar, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1.5 h-full justify-end">
+                    <div className="w-full flex items-end justify-center gap-1">
+                      <div
+                        style={{ height: `${(bar.ai / 120) * 80}px` }}
+                        className="w-4 rounded-t-md bg-poko-charcoal transition-all hover:opacity-80"
+                      ></div>
+                      <div
+                        style={{ height: `${(bar.human / 120) * 80}px` }}
+                        className="w-4 rounded-t-md bg-stone-300 transition-all hover:opacity-80"
+                      ></div>
+                    </div>
+                    <span className="text-[10px] text-stone-500 font-medium">{bar.day}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* KANBAN CRM PIPELINE (Ronas IT Style) */}
-          <div>
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h2 className="text-lg font-bold text-poko-charcoal">Sales Pipeline & CRM Deals</h2>
-                <p className="text-xs text-stone-500">
-                  Pelacakan otomatis deal dari WhatsApp masuk sampai transaksi selesai
-                </p>
+          {/* Right 1 Col: AI Bot Control & Safety Switch */}
+          <div className="rounded-3xl bg-white border border-poko-border p-7 flex flex-col justify-between shadow-card">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center">
+                  <Bot className="w-5 h-5" />
+                </div>
+                <span className="text-[11px] font-mono px-2 py-1 rounded-md bg-stone-100 text-stone-600">
+                  gpt-6-luna
+                </span>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button className="px-3 py-1.5 rounded-xl border border-poko-border text-xs font-semibold text-stone-600 bg-white hover:bg-stone-50">
-                  Filter: Semua Tahap
-                </button>
-                <button className="px-3 py-1.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black">
-                  + Tambah Deal Manual
-                </button>
+              <h3 className="font-bold text-base text-poko-charcoal">Poko AI Engine</h3>
+              <p className="text-xs text-stone-500 mt-1">
+                Didukung Sakelar AI Gateway dengan proteksi self-chat loop & filter grup anti-spam.
+              </p>
+
+              <div className="mt-5 space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-stone-50 border border-stone-200/70">
+                  <span className="text-xs font-medium text-stone-700">Auto-Reply Status</span>
+                  <button
+                    onClick={() => setAutoReplyEnabled(!autoReplyEnabled)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                      autoReplyEnabled ? "bg-emerald-600" : "bg-stone-300"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        autoReplyEnabled ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-xs text-stone-600 space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-stone-400">Target WhatsApp:</span>
+                    <span className="font-semibold text-stone-800">089637370000</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-stone-400">Response Speed:</span>
+                    <span className="font-semibold text-emerald-600">1.2 detik (Streaming)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-stone-400">Whitelist Safety:</span>
+                    <span className="font-semibold text-stone-800">3 Nomor Terverifikasi</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Kanban Columns Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-              {pipelineStages.map((stage, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-3xl bg-white border border-poko-border p-4 flex flex-col shadow-subtle min-h-[460px]"
-                >
-                  {/* Column Header */}
-                  <div className="flex items-center justify-between pb-3 border-b border-poko-border mb-4">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-poko-charcoal"></span>
-                      <h4 className="font-bold text-xs text-poko-charcoal tracking-tight">
-                        {stage.title}
-                      </h4>
-                      <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-stone-100 text-stone-600">
-                        {stage.count}
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-bold text-stone-400">{stage.total}</span>
-                  </div>
-
-                  {/* Cards inside Column */}
-                  <div className="space-y-3.5 flex-1 overflow-y-auto pr-0.5">
-                    {stage.cards.map((card) =>
-                      card.dark ? (
-                        // Ronas IT Dark Card Highlight Style
-                        <div
-                          key={card.id}
-                          className="rounded-2xl bg-poko-charcoal text-white p-4 shadow-card space-y-3 border border-stone-800 transition-all hover:-translate-y-0.5"
-                        >
-                          <div className="flex items-start justify-between">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/10 text-white border border-white/20">
-                              {card.tag}
-                            </span>
-                            <span className="text-[10px] text-stone-400">{card.time}</span>
-                          </div>
-                          <div>
-                            <p className="font-bold text-sm text-white">{card.name}</p>
-                            <p className="text-[11px] text-stone-400 font-mono mt-0.5">
-                              {card.phone}
-                            </p>
-                          </div>
-                          <p className="text-xs text-stone-300 leading-relaxed">{card.summary}</p>
-                          <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
-                            <span className="text-[11px] text-stone-400">Estimasi Nilai</span>
-                            <span className="font-bold text-emerald-400">{card.value}</span>
-                          </div>
-                        </div>
-                      ) : (
-                        // Standard White Card Style
-                        <div
-                          key={card.id}
-                          className="rounded-2xl bg-white p-4 shadow-subtle border border-stone-200/70 space-y-3 transition-all hover:border-stone-400 hover:-translate-y-0.5"
-                        >
-                          <div className="flex items-start justify-between">
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${card.tagColor}`}
-                            >
-                              {card.tag}
-                            </span>
-                            <span className="text-[10px] text-stone-400">{card.time}</span>
-                          </div>
-                          <div>
-                            <p className="font-bold text-sm text-poko-charcoal">{card.name}</p>
-                            <p className="text-[11px] text-stone-500 font-mono mt-0.5">
-                              {card.phone}
-                            </p>
-                          </div>
-                          <p className="text-xs text-stone-600 leading-relaxed">{card.summary}</p>
-                          <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-xs">
-                            <span className="text-[11px] text-stone-400">Estimasi Nilai</span>
-                            <span className="font-bold text-poko-charcoal">{card.value}</span>
-                          </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              ))}
+            <div className="pt-4 border-t border-poko-border">
+              <Link
+                href="/app/omnichannel-crm"
+                className="w-full py-2.5 px-4 rounded-xl bg-poko-linen text-poko-charcoal font-semibold text-xs flex items-center justify-center gap-2 hover:bg-stone-200 transition-all border border-stone-300/60"
+              >
+                <MessageSquare className="w-4 h-4 text-emerald-600" />
+                Buka CRM Chat App 👑
+              </Link>
             </div>
           </div>
         </div>
-      </main>
-    </div>
+
+        {/* KANBAN CRM PIPELINE PREVIEW */}
+        <div>
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-lg font-bold text-poko-charcoal">Sales Pipeline & CRM Deals</h2>
+              <p className="text-xs text-stone-500">
+                Pelacakan otomatis deal dari WhatsApp masuk sampai transaksi selesai
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Link
+                href="/app/omnichannel-crm/pipeline"
+                className="px-3.5 py-1.5 rounded-xl border border-poko-border text-xs font-semibold text-stone-600 bg-white hover:bg-stone-50 flex items-center gap-1.5"
+              >
+                <span>Lihat Full Pipeline Board</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Kanban Columns Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {pipelineStages.map((stage, idx) => (
+              <div
+                key={idx}
+                className="rounded-3xl bg-white border border-poko-border p-4 flex flex-col shadow-subtle min-h-[440px]"
+              >
+                {/* Column Header */}
+                <div className="flex items-center justify-between pb-3 border-b border-poko-border mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-poko-charcoal"></span>
+                    <h4 className="font-bold text-xs text-poko-charcoal tracking-tight">
+                      {stage.title}
+                    </h4>
+                    <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-stone-100 text-stone-600">
+                      {stage.count}
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-bold text-stone-400">{stage.total}</span>
+                </div>
+
+                {/* Cards inside Column */}
+                <div className="space-y-3 flex-1 overflow-y-auto pr-0.5">
+                  {stage.cards.map((card) =>
+                    card.dark ? (
+                      <div
+                        key={card.id}
+                        className="rounded-2xl bg-poko-charcoal text-white p-4 shadow-card space-y-3 border border-stone-800 transition-all hover:-translate-y-0.5"
+                      >
+                        <div className="flex items-start justify-between">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/10 text-white border border-white/20">
+                            {card.tag}
+                          </span>
+                          <span className="text-[10px] text-stone-400">{card.time}</span>
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-white">{card.name}</p>
+                          <p className="text-[11px] text-stone-400 font-mono mt-0.5">
+                            {card.phone}
+                          </p>
+                        </div>
+                        <p className="text-xs text-stone-300 leading-relaxed">{card.summary}</p>
+                        <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+                          <span className="text-[11px] text-stone-400">Estimasi Nilai</span>
+                          <span className="font-bold text-emerald-400">{card.value}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        key={card.id}
+                        className="rounded-2xl bg-white p-4 shadow-subtle border border-stone-200/70 space-y-3 transition-all hover:border-stone-400 hover:-translate-y-0.5"
+                      >
+                        <div className="flex items-start justify-between">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${card.tagColor}`}
+                          >
+                            {card.tag}
+                          </span>
+                          <span className="text-[10px] text-stone-400">{card.time}</span>
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-poko-charcoal">{card.name}</p>
+                          <p className="text-[11px] text-stone-500 font-mono mt-0.5">
+                            {card.phone}
+                          </p>
+                        </div>
+                        <p className="text-xs text-stone-600 leading-relaxed">{card.summary}</p>
+                        <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-xs">
+                          <span className="text-[11px] text-stone-400">Estimasi Nilai</span>
+                          <span className="font-bold text-poko-charcoal">{card.value}</span>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </PokoAppShell>
   );
 }
