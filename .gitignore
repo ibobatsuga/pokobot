@@ -1,0 +1,22 @@
+# Environment & Secrets (SANGAT PENTING: Jangan commit API Key)
+.env
+.env.backup
+*.env
+
+# WhatsApp Session Files (Kredensial Sesi WhatsApp)
+.sessions/
+*.sessions
+
+# Temporary Storage & Logs
+storage/*.log
+storage/*.json
+!storage/.gitkeep
+qr.png
+
+# Dependencies
+/vendor/
+/node_modules/
+
+# OS Specific
+.DS_Store
+Thumbs.db

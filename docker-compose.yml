@@ -1,0 +1,23 @@
+services:
+  waha:
+    image: devlikeapro/waha:latest
+    container_name: waha_gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Engine WhatsApp: WEBJS / NOWEB
+      - WHATSAPP_DEFAULT_ENGINE=NOWEB
+      # URL Webhook tujuan ketika ada pesan masuk dari WAHA ke backend kita
+      - WHATSAPP_HOOK_URL=http://host.docker.internal:8000/webhook.php
+      - WHATSAPP_HOOK_EVENTS=message,message.any,session.status
+      # Nonaktifkan API Key untuk kemudahan local testing
+      - WAHA_NO_API_KEY=true
+      # Nonaktifkan password login dashboard agar langsung terbuka tanpa perlu login
+      - WAHA_DASHBOARD_ENABLED=true
+      - WAHA_DASHBOARD_NO_PASSWORD=true
+      - WHATSAPP_SWAGGER_NO_PASSWORD=true
+      - WAHA_LOG_LEVEL=info
+    volumes:
+      # Menyimpan file sesi login WhatsApp agar tidak perlu scan QR berulang kali
+      - ./.sessions:/app/.sessions
