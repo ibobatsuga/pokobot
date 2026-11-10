@@ -219,13 +219,10 @@ export function Sidebar() {
             P
           </div>
           <div>
-            <div className="font-bold text-base tracking-tight text-poko-charcoal flex items-center gap-1.5 leading-none">
-              Poko
-              <span className="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded-full bg-poko-linen text-poko-charcoal border border-stone-200">
-                Omnichannel
-              </span>
+            <div className="font-bold text-base tracking-tight text-poko-charcoal leading-none">
+              PokoBot
             </div>
-            <p className="text-[11px] text-stone-400 mt-1">by Team FLUXY</p>
+            <p className="text-[11px] text-stone-400 mt-1">by FLUXY.ID</p>
           </div>
         </Link>
       </div>

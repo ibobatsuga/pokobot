@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Poko - AI Omnichannel CRM & WhatsApp Engine",
-  description: "Next-generation WhatsApp CRM and AI Assistant powered by WAHA & Sakelar AI",
+  title: "PokoBot by FLUXY.ID - AI WhatsApp Automation & CRM",
+  description: "Next-generation WhatsApp CRM and AI Assistant by FLUXY.ID powered by WAHA & Sakelar AI",
   manifest: "/manifest-omnichannel.json",
   icons: {
     icon: "/favicon.ico",

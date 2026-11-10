@@ -1,6 +1,6 @@
-# 🤖 Poko Bot & Omnichannel CRM (WAHA + Sakelar AI)
+# PokoBot by FLUXY.ID (WhatsApp CRM & AI Bot)
 
-Duplikasi arsitektur WhatsApp CRM & AI Assistant bertenaga **Next.js 15**, **Tailwind CSS**, **WAHA (WhatsApp HTTP API)**, dan **Sakelar AI (GPT-6 Luna)** dengan desain **Ronas IT Warm Minimalist**.
+Solusi WhatsApp CRM & AI Assistant bertenaga **Next.js 15**, **Tailwind CSS**, **WAHA (WhatsApp HTTP API)**, dan **Sakelar AI (GPT-6 Luna)** dengan desain **Ronas IT Warm Minimalist**.
 
 ---
 

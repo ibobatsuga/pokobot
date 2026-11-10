@@ -116,7 +116,7 @@ export default function PokoDashboardPage() {
   return (
     <PokoAppShell
       title="Dashboard Stats"
-      subtitle="Ringkasan performa penjualan, pipeline CRM, dan bot otomatisasi AI"
+      subtitle="Ringkasan performa percakapan WhatsApp, otomasi AI bot, dan aktivitas leads"
     >
       <div className="space-y-8">
         {/* HERO KPI SECTION: Ronas IT Warm Minimalist Card */}
@@ -127,13 +127,13 @@ export default function PokoDashboardPage() {
               <div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 border border-stone-200 text-xs font-semibold text-stone-700 mb-3">
                   <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
-                  Target Penjualan Bulan Ini
+                  Total Pesan Diproses
                 </div>
                 <h2 className="text-3xl font-bold tracking-tight text-poko-charcoal">
-                  Rp 142.800.000
+                  18.420 Pesan
                 </h2>
                 <p className="text-xs text-stone-600 mt-1">
-                  Dari target total Rp 180.000.000 (November 2026)
+                  1.428 kontak aktif • 1.2 detik rata-rata kecepatan respon AI
                 </p>
               </div>
 
@@ -159,16 +159,16 @@ export default function PokoDashboardPage() {
                       stroke="#1f1f1f"
                       strokeWidth="10"
                       strokeDasharray="251.2"
-                      strokeDashoffset="153.2"
+                      strokeDashoffset="142.8"
                       strokeLinecap="round"
                       className="transition-all duration-1000 ease-out"
                     />
                   </svg>
                   <div className="absolute bottom-1 text-center">
-                    <span className="text-2xl font-bold text-poko-charcoal">78%</span>
+                    <span className="text-2xl font-bold text-poko-charcoal">86%</span>
                   </div>
                 </div>
-                <span className="text-[11px] font-medium text-stone-500 mt-1">Goal Reached</span>
+                <span className="text-[11px] font-medium text-stone-500 mt-1">Otomasi AI Berhasil</span>
               </div>
             </div>
 
@@ -229,7 +229,7 @@ export default function PokoDashboardPage() {
                 </span>
               </div>
 
-              <h3 className="font-bold text-base text-poko-charcoal">Poko AI Engine</h3>
+              <h3 className="font-bold text-base text-poko-charcoal">PokoBot AI Engine</h3>
               <p className="text-xs text-stone-500 mt-1">
                 Didukung Sakelar AI Gateway dengan proteksi self-chat loop & filter grup anti-spam.
               </p>

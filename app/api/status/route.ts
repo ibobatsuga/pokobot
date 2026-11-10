@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   return NextResponse.json({
     status: "ok",
-    app: "Poko Omnichannel CRM",
+    app: "PokoBot by FLUXY.ID",
     version: "1.0.0",
     engine: {
       whatsapp: "WAHA (WhatsApp HTTP API)",

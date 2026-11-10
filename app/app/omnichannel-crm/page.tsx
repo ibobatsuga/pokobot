@@ -72,13 +72,13 @@ export default function OmnichannelCrmPage() {
         {
           id: "m1",
           sender: "customer",
-          text: "Halo Poko, saya mau tanya paket langganan untuk perusahaan.",
+          text: "Halo PokoBot, saya mau tanya paket langganan untuk perusahaan.",
           time: "13:10",
         },
         {
           id: "m2",
           sender: "bot",
-          text: "Halo Pak Hendro! Selamat datang di Poko. Kami menyediakan solusi CRM Omnichannel & Automasi WhatsApp bertenaga AI. Ada estimasi berapa kontak atau pesan yang ingin diproses setiap bulannya?",
+          text: "Halo Pak Hendro! Selamat datang di PokoBot by FLUXY.ID. Kami menyediakan solusi CRM & Automasi WhatsApp bertenaga AI. Ada estimasi berapa kontak atau pesan yang ingin diproses setiap bulannya?",
           time: "13:10",
         },
         {
@@ -214,7 +214,7 @@ export default function OmnichannelCrmPage() {
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div>
-              <h2 className="font-bold text-sm text-poko-charcoal leading-tight">Omnichannel CRM</h2>
+              <h2 className="font-bold text-sm text-poko-charcoal leading-tight">PokoBot Chat</h2>
               <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 WAHA Gateway Online
@@ -224,7 +224,7 @@ export default function OmnichannelCrmPage() {
 
           <div className="flex items-center gap-1.5">
             <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-poko-linen text-stone-700 border border-stone-200">
-              Poko v1.0
+              PokoBot by FLUXY.ID
             </span>
           </div>
         </div>
@@ -346,7 +346,7 @@ export default function OmnichannelCrmPage() {
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-stone-100 border border-stone-200">
               <Bot className={`w-4 h-4 ${activeContact.botActive ? "text-purple-600" : "text-stone-400"}`} />
               <span className="text-xs font-semibold text-stone-700">
-                {activeContact.botActive ? "Poko AI Aktif" : "AI Paused"}
+                {activeContact.botActive ? "PokoBot AI Aktif" : "AI Paused"}
               </span>
               <button
                 onClick={toggleBotActive}
@@ -399,7 +399,7 @@ export default function OmnichannelCrmPage() {
                   {isBot && (
                     <div className="flex items-center gap-1 text-[10px] font-bold text-purple-700 mb-1">
                       <Bot className="w-3 h-3" />
-                      <span>Poko AI (gpt-6-luna)</span>
+                      <span>PokoBot AI (gpt-6-luna)</span>
                     </div>
                   )}
                   {msg.sender === "agent" && (

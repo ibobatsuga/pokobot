@@ -1,11 +1,11 @@
 {
-  "name": "Poko Omnichannel CRM",
-  "short_name": "Poko Chat",
+  "name": "PokoBot by FLUXY.ID",
+  "short_name": "PokoBot",
   "start_url": "/app/omnichannel-crm",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1f1f1f",
-  "description": "Poko Omnichannel WhatsApp CRM & AI Chat Application",
+  "description": "PokoBot WhatsApp Automation & CRM Application by FLUXY.ID",
   "icons": [
     {
       "src": "/favicon.ico",
