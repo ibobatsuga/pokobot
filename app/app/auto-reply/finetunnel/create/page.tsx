@@ -19,10 +19,21 @@ import {
   Bot,
   Plus,
   Trash2,
+  Globe,
+  RefreshCw,
+  Image as ImageIcon,
+  Truck,
+  MapPin,
+  Paperclip,
+  Check,
 } from "lucide-react";
 
 export default function FineTunnelCreatePage() {
-  const [activeTab, setActiveTab] = useState<"basic" | "behaviour" | "knowledge" | "escalation">("basic");
+  const [activeTab, setActiveTab] = useState<
+    "basic" | "behaviour" | "knowledge" | "extra_training" | "follow_up" | "media" | "shipping" | "escalation"
+  >("basic");
+
+  // Basic Settings
   const [agentName, setAgentName] = useState("PokoBot Sales & CS Consultant");
   const [model, setModel] = useState("pokobot-fast");
   const [temperature, setTemperature] = useState(0.7);
@@ -35,6 +46,7 @@ export default function FineTunnelCreatePage() {
     "PT FLUXY KARYA DIGITAL - Penyedia solusi WhatsApp CRM, automasi pesan massal, dan chatbot AI pintar untuk bisnis & UMKM di Indonesia."
   );
 
+  // Core Knowledge
   const [trainingDataText, setTrainingDataText] = useState(
 `=== KATALOG PAKET LANGGANAN ===
 1. Paket Starter:
@@ -71,6 +83,75 @@ export default function FineTunnelCreatePage() {
     },
   ]);
 
+  // 1. DATA TRAINING TAMBAHAN
+  const [webUrls, setWebUrls] = useState(["https://tokofluxy.id/katalog", "https://tokofluxy.id/faq"]);
+  const [newUrlInput, setNewUrlInput] = useState("");
+  const [uploadedDocs, setUploadedDocs] = useState([
+    { name: "SOP-Pelayanan-CS-2026.pdf", size: "1.8 MB", status: "Sudah Dipelajari AI", chars: 8400 },
+    { name: "Daftar-Harga-Grosir-Q4.xlsx", size: "450 KB", status: "Sudah Dipelajari AI", chars: 3200 },
+  ]);
+
+  // 2. FOLLOW UP OTOMATIS
+  const [followUpEnabled, setFollowUpEnabled] = useState(true);
+  const [followUpSequences, setFollowUpSequences] = useState([
+    {
+      step: 1,
+      delayMinutes: 15,
+      delayLabel: "15 Menit setelah chat berhenti",
+      message: "Halo kak {{nama}}, apakah ada informasi lain yang ingin ditanyakan seputar paket PokoBot? Tim kami siap bantu ya!",
+      active: true,
+    },
+    {
+      step: 2,
+      delayMinutes: 120,
+      delayLabel: "2 Jam jika belum ada respon",
+      message: "Hai kak {{nama}}, khusus hari ini ada promo diskon tambahan 10% untuk upgrade ke Paket Pro lho. Mau kami bantu proses vouchernya?",
+      active: true,
+    },
+    {
+      step: 3,
+      delayMinutes: 1440,
+      delayLabel: "24 Jam (Hari Berikutnya)",
+      message: "Halo kak, percakapan ini akan kami simpan ke sistem CRM kami. Jika butuh konsultasi lagi, tinggal balas chat ini kapan saja ya. Terima kasih!",
+      active: true,
+    },
+  ]);
+
+  // 3. INTEGRASI MEDIA
+  const [mediaRules, setMediaRules] = useState([
+    {
+      id: "mr-1",
+      keyword: "katalog, brosur, pricelist, paket",
+      mediaType: "PDF Document",
+      mediaName: "Brosur-Paket-Enterprise-2026.pdf",
+      caption: "Berikut katalog lengkap produk dan paket PokoBot kami ya kak:",
+      active: true,
+    },
+    {
+      id: "mr-2",
+      keyword: "rekening, bayar, qris, transfer, invoice",
+      mediaType: "Image (QRIS)",
+      mediaName: "QRIS-Duitku-Fluxy-Official.png",
+      caption: "Silakan scan kode QRIS BCA/Gopay/OVO resmi kami di atas untuk pembayaran instan:",
+      active: true,
+    },
+    {
+      id: "mr-3",
+      keyword: "halo, selamat pagi, selamat siang, assalamualaikum",
+      mediaType: "Voice Note (.ogg)",
+      mediaName: "Voice-Greeting-Halo-Selamat-Datang.ogg",
+      caption: "Salam hangat dari Customer Care PokoBot!",
+      active: false,
+    },
+  ]);
+
+  // 4. INTEGRASI ONGKOS KIRIM
+  const [shippingEnabled, setShippingEnabled] = useState(true);
+  const [originCity, setOriginCity] = useState("Jakarta Barat (Gudang Utama)");
+  const [defaultWeight, setDefaultWeight] = useState(1000); // 1kg
+  const [selectedCouriers, setSelectedCouriers] = useState(["jne", "jnt", "sicepat", "anteraja"]);
+
+  // Escalation
   const [escalateKeywords, setEscalateKeywords] = useState("admin, manusia, cs, komplain, refund, bos, telepon");
   const [saved, setSaved] = useState(false);
 
@@ -78,6 +159,22 @@ export default function FineTunnelCreatePage() {
     e.preventDefault();
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+  };
+
+  const addUrl = () => {
+    if (!newUrlInput.trim()) return;
+    setWebUrls((prev) => [...prev, newUrlInput.trim()]);
+    setNewUrlInput("");
+  };
+
+  const removeUrl = (idx: number) => {
+    setWebUrls((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const toggleCourier = (courierId: string) => {
+    setSelectedCouriers((prev) =>
+      prev.includes(courierId) ? prev.filter((c) => c !== courierId) : [...prev, courierId]
+    );
   };
 
   const addFaq = () => {
@@ -98,8 +195,8 @@ export default function FineTunnelCreatePage() {
 
   return (
     <PokoAppShell
-      title="Buat Data Training AI (Fine-Tuning)"
-      subtitle="Kelola pengetahuan bisnis, SOP respon, dan data latih produk untuk AI Agent WhatsApp Anda"
+      title="Buat Data Training AI (FineTunnel)"
+      subtitle="Kelola pengetahuan produk, data training tambahan, auto follow-up, kirim media otomatis, dan integrasi ongkos kirim"
       actionButton={
         <div className="flex items-center gap-2">
           <Link
@@ -114,7 +211,7 @@ export default function FineTunnelCreatePage() {
             className="h-9 px-4 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all flex items-center gap-1.5 shadow-sm"
           >
             <Save className="w-3.5 h-3.5" />
-            <span>Simpan Data Training</span>
+            <span>Simpan Semua Konfigurasi</span>
           </button>
         </div>
       }
@@ -123,17 +220,21 @@ export default function FineTunnelCreatePage() {
         {saved && (
           <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-fadeIn">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <span>Data Training berhasil disimpan dan siap digunakan oleh engine AI PokoBot!</span>
+            <span>Data Training, Follow-up, Media, dan Integrasi Ongkos Kirim berhasil disimpan dan aktif!</span>
           </div>
         )}
 
-        {/* Tab Navigation */}
-        <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-poko-border shadow-xs overflow-x-auto">
+        {/* Tab Navigation (8 Dedicated Modules) */}
+        <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-2xl border border-poko-border shadow-xs overflow-x-auto">
           {[
-            { id: "basic", label: "1. Pengaturan Dasar AI Agent", icon: Sliders },
-            { id: "behaviour", label: "2. AI Behaviour & Persona", icon: Bot },
-            { id: "knowledge", label: "3. Data Training & Knowledge Base", icon: FileText },
-            { id: "escalation", label: "4. Aturan Eskalasi ke CS Manusia", icon: UserCheck },
+            { id: "basic", label: "Pengaturan Dasar", icon: Sliders },
+            { id: "behaviour", label: "Persona & SOP", icon: Bot },
+            { id: "knowledge", label: "Knowledge Base", icon: FileText },
+            { id: "extra_training", label: "Training Tambahan", icon: Globe, badge: "Web & File" },
+            { id: "follow_up", label: "Auto Follow Up", icon: RefreshCw, badge: "Drip" },
+            { id: "media", label: "Kirim Media", icon: ImageIcon, badge: "QRIS/PDF" },
+            { id: "shipping", label: "Integrasi Ongkir", icon: Truck, badge: "Cek Ongkir" },
+            { id: "escalation", label: "Eskalasi CS", icon: UserCheck },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -141,14 +242,25 @@ export default function FineTunnelCreatePage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive
                     ? "bg-poko-charcoal text-white shadow-xs"
                     : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="w-3.5 h-3.5 shrink-0" />
                 <span>{tab.label}</span>
+                {tab.badge && (
+                  <span
+                    className={`px-1.5 py-0.2 rounded-md text-[9px] font-bold ${
+                      isActive
+                        ? "bg-white/20 text-white"
+                        : "bg-stone-100 text-stone-600 border border-stone-200"
+                    }`}
+                  >
+                    {tab.badge}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -304,10 +416,9 @@ export default function FineTunnelCreatePage() {
           </div>
         )}
 
-        {/* TAB 3: DATA TRAINING & KNOWLEDGE BASE */}
+        {/* TAB 3: KNOWLEDGE BASE INTI */}
         {activeTab === "knowledge" && (
           <div className="space-y-6">
-            {/* Core Training Text */}
             <div className="p-7 rounded-3xl bg-white border border-poko-border shadow-subtle space-y-4">
               <div className="flex items-center justify-between border-b border-stone-100 pb-3">
                 <div>
@@ -322,17 +433,11 @@ export default function FineTunnelCreatePage() {
               </div>
 
               <textarea
-                rows={14}
+                rows={12}
                 value={trainingDataText}
                 onChange={(e) => setTrainingDataText(e.target.value)}
                 className="w-full p-4 rounded-2xl bg-stone-50 border border-stone-200 text-xs font-mono text-stone-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
               />
-
-              <div className="p-3.5 rounded-2xl bg-poko-linen border border-stone-300/60 text-xs text-stone-700 space-y-1">
-                <span className="font-bold block text-poko-charcoal">Tips Format Data Training Efektif:</span>
-                <p>• Gunakan judul bab dengan tanda sama dengan, misalnya: <code className="bg-white px-1 py-0.5 rounded border border-stone-300">=== DAFTAR HARGA ===</code></p>
-                <p>• Tuliskan poin-poin dengan jelas dan sertakan angka nominal agar bot tidak salah memberikan harga ke calon pembeli.</p>
-              </div>
             </div>
 
             {/* Q&A FAQ Builder */}
@@ -388,7 +493,354 @@ export default function FineTunnelCreatePage() {
           </div>
         )}
 
-        {/* TAB 4: ATURAN ESKALASI KE HUMAN CS */}
+        {/* TAB 4: DATA TRAINING TAMBAHAN (URL & FILES) */}
+        {activeTab === "extra_training" && (
+          <div className="space-y-6">
+            {/* Website Scraper / URL Crawler */}
+            <div className="p-7 rounded-3xl bg-white border border-poko-border shadow-subtle space-y-4">
+              <div className="border-b border-stone-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-purple-600" />
+                  <h3 className="font-bold text-sm text-poko-charcoal">Web Scraper Knowledge (Crawl Otomatis URL)</h3>
+                </div>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  Masukkan link landing page atau website toko online Anda agar AI otomatis membaca seluruh konten teksnya
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="url"
+                  placeholder="https://tokoanda.com/katalog-produk"
+                  value={newUrlInput}
+                  onChange={(e) => setNewUrlInput(e.target.value)}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
+                />
+                <button
+                  type="button"
+                  onClick={addUrl}
+                  className="h-9 px-4 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all flex items-center gap-1.5 shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Ambil Konten URL</span>
+                </button>
+              </div>
+
+              {/* URL List */}
+              <div className="space-y-2 pt-2">
+                {webUrls.map((url, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-between text-xs"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                      <span className="font-mono text-stone-800 truncate">{url}</span>
+                      <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shrink-0">
+                        Tersinkronisasi
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeUrl(idx)}
+                      className="text-stone-400 hover:text-rose-600 p-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Document Upload (PDF, Word, Excel) */}
+            <div className="p-7 rounded-3xl bg-white border border-poko-border shadow-subtle space-y-4">
+              <div className="border-b border-stone-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Upload className="w-4 h-4 text-blue-600" />
+                  <h3 className="font-bold text-sm text-poko-charcoal">Upload Berkas Dokumen (PDF, DOCX, CSV)</h3>
+                </div>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  Lampirkan dokumen SOP, brosur spesifikasi produk, atau spreadsheet daftar harga untuk dipelajari AI
+                </p>
+              </div>
+
+              {/* Dropzone */}
+              <div className="border-2 border-dashed border-stone-300 rounded-2xl p-6 text-center hover:border-stone-400 transition-colors bg-stone-50/50 cursor-pointer">
+                <Upload className="w-8 h-8 text-stone-400 mx-auto mb-2" />
+                <p className="text-xs font-semibold text-stone-700">Tarik dan letakkan berkas di sini, atau klik untuk memilih</p>
+                <p className="text-[11px] text-stone-400 mt-1">Mendukung file PDF, Word (.docx), Excel (.xlsx), atau TXT (Maks. 25MB per file)</p>
+              </div>
+
+              {/* Uploaded Docs Table */}
+              <div className="space-y-2 pt-2">
+                {uploadedDocs.map((doc, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3.5 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-between text-xs"
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-purple-600" />
+                      <div>
+                        <p className="font-semibold text-poko-charcoal">{doc.name}</p>
+                        <p className="text-[11px] text-stone-400">{doc.size} • {doc.chars} karakter diekstrak</p>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      {doc.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: FOLLOW UP OTOMATIS */}
+        {activeTab === "follow_up" && (
+          <div className="p-7 rounded-3xl bg-white border border-poko-border shadow-subtle space-y-6">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 text-emerald-600" />
+                  <h3 className="font-bold text-sm text-poko-charcoal">Auto Follow-Up Sequence (Pancingan Chat Otomatis)</h3>
+                </div>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  Kirim pesan pengingat otomatis jika pelanggan berhenti membalas atau menggantungkan percakapan
+                </p>
+              </div>
+
+              {/* Master Switch */}
+              <button
+                type="button"
+                onClick={() => setFollowUpEnabled(!followUpEnabled)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                  followUpEnabled ? "bg-emerald-600" : "bg-stone-300"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    followUpEnabled ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Sequence Steps */}
+            <div className="space-y-4">
+              {followUpSequences.map((seq, idx) => (
+                <div key={seq.step} className="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-poko-charcoal text-white text-[11px] font-bold flex items-center justify-center">
+                        {seq.step}
+                      </span>
+                      <h4 className="font-bold text-xs text-poko-charcoal">{seq.delayLabel}</h4>
+                    </div>
+
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white text-stone-700 border border-stone-200">
+                      Jeda: {seq.delayMinutes} Menit
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-stone-600 mb-1">
+                      Template Pesan Follow-Up:
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={seq.message}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFollowUpSequences((prev) => {
+                          const next = [...prev];
+                          next[idx].message = val;
+                          return next;
+                        });
+                      }}
+                      className="w-full p-3 rounded-xl bg-white border border-stone-200 text-xs text-stone-800 leading-relaxed focus:outline-none focus:ring-1 focus:ring-poko-charcoal"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 6: INTEGRASI MEDIA OTOMATIS */}
+        {activeTab === "media" && (
+          <div className="p-7 rounded-3xl bg-white border border-poko-border shadow-subtle space-y-6">
+            <div className="border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-purple-600" />
+                <h3 className="font-bold text-sm text-poko-charcoal">Integrasi Media Otomatis (Kirim Gambar/PDF dari Bot)</h3>
+              </div>
+              <p className="text-xs text-stone-500 mt-0.5">
+                Atur pengiriman file brosur, gambar QRIS, atau foto produk secara otomatis saat pelanggan menanyakan hal terkait
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {mediaRules.map((rule, idx) => (
+                <div key={rule.id} className="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-poko-charcoal bg-white px-2.5 py-1 rounded-lg border border-stone-200">
+                      Pemicu: {rule.keyword}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                      {rule.mediaType}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-stone-600 mb-1">
+                        File Terpilih dari Media Manager:
+                      </label>
+                      <div className="p-2.5 rounded-xl bg-white border border-stone-200 text-xs font-semibold text-stone-800 flex items-center gap-2">
+                        <Paperclip className="w-3.5 h-3.5 text-stone-400" />
+                        <span>{rule.mediaName}</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-stone-600 mb-1">
+                        Caption / Kalimat Pengantar File:
+                      </label>
+                      <input
+                        type="text"
+                        value={rule.caption}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setMediaRules((prev) => {
+                            const next = [...prev];
+                            next[idx].caption = val;
+                            return next;
+                          });
+                        }}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-stone-200 text-xs text-stone-800 focus:outline-none focus:ring-1 focus:ring-poko-charcoal"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 7: INTEGRASI ONGKOS KIRIM */}
+        {activeTab === "shipping" && (
+          <div className="p-7 rounded-3xl bg-white border border-poko-border shadow-subtle space-y-6">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Truck className="w-4 h-4 text-emerald-600" />
+                  <h3 className="font-bold text-sm text-poko-charcoal">Integrasi Ongkos Kirim (Cek Ongkir Otomatis by AI)</h3>
+                </div>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  AI akan secara otomatis mendeteksi nama kecamatan/kota tujuan pelanggan dan langsung membalas tarif ongkir real-time
+                </p>
+              </div>
+
+              {/* Master Switch */}
+              <button
+                type="button"
+                onClick={() => setShippingEnabled(!shippingEnabled)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                  shippingEnabled ? "bg-emerald-600" : "bg-stone-300"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    shippingEnabled ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 mb-1.5 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-rose-600" />
+                  Kota / Kecamatan Asal Pengiriman (Gudang Anda)
+                </label>
+                <input
+                  type="text"
+                  value={originCity}
+                  onChange={(e) => setOriginCity(e.target.value)}
+                  placeholder="Contoh: Kebon Jeruk, Jakarta Barat"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+                  Estimasi Berat Default per Paket (Gram)
+                </label>
+                <input
+                  type="number"
+                  value={defaultWeight}
+                  onChange={(e) => setDefaultWeight(parseInt(e.target.value) || 1000)}
+                  placeholder="1000 (1 kg)"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
+                />
+              </div>
+            </div>
+
+            {/* Courier Selection */}
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 mb-2">
+                Pilih Ekspedisi Kurir yang Didukung:
+              </label>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                {[
+                  { id: "jne", label: "JNE Express" },
+                  { id: "jnt", label: "J&T Express" },
+                  { id: "sicepat", label: "SiCepat" },
+                  { id: "anteraja", label: "Anteraja" },
+                  { id: "pos", label: "Pos Indonesia" },
+                  { id: "idexpress", label: "ID Express" },
+                ].map((courier) => {
+                  const isChecked = selectedCouriers.includes(courier.id);
+                  return (
+                    <div
+                      key={courier.id}
+                      onClick={() => toggleCourier(courier.id)}
+                      className={`p-3 rounded-2xl border cursor-pointer transition-all flex flex-col items-center justify-center text-center gap-1 ${
+                        isChecked
+                          ? "bg-poko-charcoal text-white border-poko-charcoal shadow-xs"
+                          : "bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100"
+                      }`}
+                    >
+                      <span className="text-xs font-bold">{courier.label}</span>
+                      <span className="text-[10px] text-stone-400">
+                        {isChecked ? "Aktif" : "Mati"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* AI Output Preview */}
+            <div className="p-5 rounded-2xl bg-poko-linen border border-stone-300/60 space-y-2">
+              <span className="text-xs font-bold text-poko-charcoal block">
+                Contoh Balasan Otomatis WhatsApp Saat Klien Tanya Ongkir:
+              </span>
+              <div className="p-3.5 rounded-xl bg-white border border-stone-200/80 text-xs text-stone-700 font-mono leading-relaxed whitespace-pre-wrap">
+{`Halo kak! Untuk pengiriman dari ${originCity} ke tujuan *Kecamatan Lowokwaru, Malang* (Estimasi 1 kg):
+
+📦 J&T EZ: Rp 22.000 (2-3 hari)
+📦 JNE REG: Rp 24.000 (2-3 hari)
+📦 SiCepat REG: Rp 22.000 (1-2 hari)
+
+Kakak mau diproses menggunakan kurir yang mana? 😊`}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 8: ATURAN ESKALASI KE HUMAN CS */}
         {activeTab === "escalation" && (
           <div className="p-7 rounded-3xl bg-white border border-poko-border shadow-subtle space-y-6">
             <div className="border-b border-stone-100 pb-3">
