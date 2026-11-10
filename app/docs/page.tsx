@@ -56,7 +56,7 @@ export default function DocsPage() {
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer pk_live_fluxy_pokobot_enterprise" \\
   -d '{
-    "chatId": "6281802731947@c.us",
+    "chatId": "6281234567890@c.us",
     "text": "Halo! Pesanan Anda telah kami proses.",
     "session": "default"
   }'`;
@@ -68,7 +68,7 @@ export default function DocsPage() {
     "Authorization": "Bearer pk_live_fluxy_pokobot_enterprise"
   },
   body: JSON.stringify({
-    chatId: "6281802731947@c.us",
+    chatId: "6281234567890@c.us",
     text: "Halo! Pesanan Anda telah kami proses.",
     session: "default"
   })
@@ -85,7 +85,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
   'Authorization: Bearer pk_live_fluxy_pokobot_enterprise'
 ]);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-  'chatId' => '6281802731947@c.us',
+  'chatId' => '6281234567890@c.us',
   'text' => 'Halo! Pesanan Anda telah kami proses.',
   'session' => 'default'
 ]));

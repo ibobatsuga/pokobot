@@ -37,7 +37,7 @@ export default function TodoListPage() {
       dueDate: "Hari Ini",
       dueTime: "14:00",
       priority: "Tinggi",
-      assignedTo: "Ibob Atsuga",
+      assignedTo: "Tim Sales",
       completed: false,
       notes: "Klien ingin konfirmasi apakah multi-device WAHA support 10 agent online serentak.",
     },

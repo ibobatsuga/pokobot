@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 export default function TestWhatsappMessagePage() {
-  const [recipient, setRecipient] = useState("6289637370000");
+  const [recipient, setRecipient] = useState("");
   const [message, setMessage] = useState(
     "Halo! Ini adalah tes pesan koneksi WhatsApp dari Poko Gateway (WAHA Engine). Status: 200 OK."
   );
@@ -36,7 +36,7 @@ export default function TestWhatsappMessagePage() {
             data: {
               id: "true_" + recipient + "@c.us_3EB0C821" + Date.now(),
               timestamp: Math.floor(Date.now() / 1000),
-              from: "6289637370000@c.us",
+              from: "default_session@c.us",
               to: recipient + "@c.us",
               body: message,
               ack: 1,
@@ -68,7 +68,7 @@ export default function TestWhatsappMessagePage() {
                 type="text"
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
-                placeholder="Contoh: 6289637370000"
+                placeholder="Contoh: 6281234567890"
                 className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-mono text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
               />
             </div>

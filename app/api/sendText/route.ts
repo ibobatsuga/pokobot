@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: "Unprocessable Entity",
-          message: "Parameter 'chatId' atau 'phone' wajib diisi (contoh: '6281802731947@c.us').",
+          message: "Parameter 'chatId' atau 'phone' wajib diisi (contoh: '6281234567890@c.us').",
         },
         { status: 422, headers: CORS_HEADERS }
       );

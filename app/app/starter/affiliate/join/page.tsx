@@ -14,7 +14,7 @@ import {
 
 export default function AffiliateJoinPage() {
   const [copied, setCopied] = useState(false);
-  const referralLink = "https://ping-clone-poc.vercel.app/?ref=ibobatsuga";
+  const referralLink = "https://ping-clone-poc.vercel.app/?ref=affiliate_partner";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink);

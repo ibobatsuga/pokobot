@@ -112,8 +112,8 @@ export default function OmnichannelCrmPage() {
     },
     {
       id: "3",
-      name: "Ibob Atsuga (Self Test)",
-      phone: "+62 896-3737-0000",
+      name: "Demo Customer Support",
+      phone: "+62 812-3456-7890",
       unread: 0,
       lastMessage: "Test pesan live dari engine Poko WhatsApp",
       time: "11:15",
@@ -414,7 +414,7 @@ export default function OmnichannelCrmPage() {
                   {msg.sender === "agent" && (
                     <div className="flex items-center gap-1 text-[10px] font-semibold text-stone-300 mb-1">
                       <User className="w-3 h-3" />
-                      <span>Ibob Atsuga (CS)</span>
+                      <span>CS Agent</span>
                     </div>
                   )}
                   <p className="whitespace-pre-wrap">{msg.text}</p>

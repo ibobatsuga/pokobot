@@ -94,7 +94,7 @@ async function runTests() {
         method: "tools/call",
         params: {
           name: "pokobot_send_whatsapp_message",
-          arguments: { phone: "6281802731947", message: "Automated QA Verification Ping" },
+          arguments: { phone: "6281234567890", message: "Automated QA Verification Ping" },
         },
       }),
     });
@@ -115,7 +115,7 @@ async function runTests() {
     });
     const callData2 = await call2.json();
     assert(call2.status === 200, "Tool call 'pokobot_get_chats' returns 200");
-    assert(callData2.result.content[0].text.includes("Budi Santoso"), "Chats list contains customer profile");
+    assert(callData2.result.content[0].text.includes("Lead 1"), "Chats list contains customer profile");
 
     // 3g. MCP Negative Test: Missing Required Parameters
     const callBadArgs = await fetch(`${BASE_URL}/api/mcp`, {
@@ -179,7 +179,7 @@ async function runTests() {
         Authorization: "Bearer pk_live_fluxy_pokobot_enterprise",
       },
       body: JSON.stringify({
-        chatId: "6281802731947@c.us",
+        chatId: "6281234567890@c.us",
         text: "Unit Test Broadcast from Zero-Defect Suite",
         session: "default",
       }),
@@ -188,7 +188,7 @@ async function runTests() {
     assert(sendValid.status === 200, "POST /api/sendText valid dispatch returns 200");
     assert(sendValidData.status === "success", "Payload confirmed status: success");
     assert(Boolean(sendValidData.messageId), `Generated messageId: ${sendValidData.messageId}`);
-    assert(sendValidData.destination === "6281802731947@c.us", "Destination format normalized");
+    assert(sendValidData.destination === "6281234567890@c.us", "Destination format normalized");
 
     // 4d. POST Missing Destination
     const sendMissingDest = await fetch(`${BASE_URL}/api/sendText`, {
@@ -202,7 +202,7 @@ async function runTests() {
     const sendMissingText = await fetch(`${BASE_URL}/api/sendText`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chatId: "6281802731947@c.us", text: "   " }),
+      body: JSON.stringify({ chatId: "6281234567890@c.us", text: "   " }),
     });
     assert(sendMissingText.status === 422, "Whitespace-only text returns HTTP 422 Unprocessable");
 
@@ -213,7 +213,7 @@ async function runTests() {
         "Content-Type": "application/json",
         Authorization: "Bearer unauthorized_hacker_key",
       },
-      body: JSON.stringify({ chatId: "6281802731947@c.us", text: "Test auth" }),
+      body: JSON.stringify({ chatId: "6281234567890@c.us", text: "Test auth" }),
     });
     assert(sendBadAuth.status === 401, "Invalid API key returns HTTP 401 Unauthorized");
   } catch (err) {
@@ -232,7 +232,7 @@ async function runTests() {
         payload: {
           id: `msg_loop_${Date.now()}`,
           fromMe: true, // Bot's own outbound message!
-          from: "6281802731947@c.us",
+          from: "6281234567890@c.us",
           body: "Echo test",
         },
       }),
@@ -259,24 +259,7 @@ async function runTests() {
     const groupData = await groupRes.json();
     assert(groupData.status === "ignored", "Group message (@g.us) strictly isolated/ignored");
 
-    // 5c. Non-Whitelisted Number Filter
-    const nonWhiteRes = await fetch(`${BASE_URL}/api/webhook`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        event: "message",
-        payload: {
-          id: `msg_stranger_${Date.now()}`,
-          fromMe: false,
-          from: "6289999999999@c.us",
-          body: "Unknown spammer message",
-        },
-      }),
-    });
-    const nonWhiteData = await nonWhiteRes.json();
-    assert(nonWhiteData.status === "ignored", "Non-whitelisted stranger number safely ignored");
-
-    // 5d. Legitimate Whitelisted Inbound Message
+    // 5c. Legitimate Inbound Message (Ready for Any New User)
     const testMsgId = `legit_msg_${Date.now()}`;
     const legitRes = await fetch(`${BASE_URL}/api/webhook`, {
       method: "POST",
@@ -286,17 +269,17 @@ async function runTests() {
         payload: {
           id: testMsgId,
           fromMe: false,
-          from: "6281802731947@c.us",
+          from: "6281234567890@c.us",
           body: "Halo kak, ongkir ke Jakarta Pusat berapa ya?",
         },
       }),
     });
     const legitData = await legitRes.json();
-    assert(legitRes.status === 200, "Legitimate whitelisted message returns 200 OK");
+    assert(legitRes.status === 200, "Legitimate inbound message returns 200 OK");
     assert(legitData.status === "accepted", "Message accepted for processing");
     assert(legitData.intentDetected === "Cek Ongkir Otomatis", "AI Intent recognized: Cek Ongkir Otomatis");
 
-    // 5e. Replay / Deduplication Guard
+    // 5d. Replay / Deduplication Guard
     const duplicateRes = await fetch(`${BASE_URL}/api/webhook`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -305,7 +288,7 @@ async function runTests() {
         payload: {
           id: testMsgId, // Same message ID!
           fromMe: false,
-          from: "6281802731947@c.us",
+          from: "6281234567890@c.us",
           body: "Halo kak, ongkir ke Jakarta Pusat berapa ya?",
         },
       }),

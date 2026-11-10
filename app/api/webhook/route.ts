@@ -10,8 +10,6 @@ const CORS_HEADERS = {
 const processedMessageIds = new Set<string>();
 const MAX_CACHE_SIZE = 1000;
 
-const DEFAULT_WHITELIST = ["6281802731947", "6281226300090", "6289637370000"];
-
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
@@ -20,17 +18,24 @@ export async function OPTIONS() {
 }
 
 export async function GET() {
+  const whitelist = process.env.POKOBOT_WHITELIST
+    ? process.env.POKOBOT_WHITELIST.split(",").map((s) => s.trim())
+    : [];
+
   return NextResponse.json(
     {
       status: "operational",
       service: "PokoBot Webhook Ingestion Gateway",
       provider: "FLUXY.ID",
       version: "1.0.0",
+      whitelistConfigured: whitelist.length > 0,
       activeGuards: [
         "Anti-loop Self-Chat Guard (fromMe check)",
         "Strict Group Message Isolation (@g.us filter)",
         "Duplicate Message ID Deduplication Cache",
-        "Whitelist Number Verification",
+        whitelist.length > 0
+          ? "Whitelist Number Verification (Enforced)"
+          : "Open User Onboarding Mode (All Private Chats Accepted)",
       ],
     },
     { headers: CORS_HEADERS }
@@ -99,21 +104,23 @@ export async function POST(req: NextRequest) {
     }
 
     const whitelist = process.env.POKOBOT_WHITELIST
-      ? process.env.POKOBOT_WHITELIST.split(",").map((s) => s.trim())
-      : DEFAULT_WHITELIST;
+      ? process.env.POKOBOT_WHITELIST.split(",").map((s) => s.trim()).filter(Boolean)
+      : [];
 
-    const isWhitelisted = whitelist.some(
-      (w) => digits.includes(w) || w.includes(digits)
-    );
-
-    if (!isWhitelisted) {
-      return NextResponse.json(
-        {
-          status: "ignored",
-          reason: `Nomor ${digits} belum terdaftar di whitelist keamanan PokoBot`,
-        },
-        { status: 200, headers: CORS_HEADERS }
+    if (whitelist.length > 0) {
+      const isWhitelisted = whitelist.some(
+        (w) => digits.includes(w) || w.includes(digits)
       );
+
+      if (!isWhitelisted) {
+        return NextResponse.json(
+          {
+            status: "ignored",
+            reason: `Nomor ${digits} belum terdaftar di whitelist keamanan PokoBot`,
+          },
+          { status: 200, headers: CORS_HEADERS }
+        );
+      }
     }
 
     // 6. PROCESS MESSAGE

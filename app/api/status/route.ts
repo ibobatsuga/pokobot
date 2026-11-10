@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  const connectedNumber = process.env.WAHA_CONNECTED_NUMBER || null;
+  const whitelist = process.env.POKOBOT_WHITELIST
+    ? process.env.POKOBOT_WHITELIST.split(",").map((s) => s.trim())
+    : [];
+
   return NextResponse.json({
     status: "ok",
     app: "PokoBot by FLUXY.ID",
@@ -8,20 +13,16 @@ export async function GET() {
     engine: {
       whatsapp: "WAHA (WhatsApp HTTP API)",
       session: "default",
-      connected_number: "+6289637370000",
+      connected_number: connectedNumber,
       ai_provider: "PokoBot AI Engine",
       ai_model: "pokobot-v1-intelligence",
-      auto_reply_enabled: false,
+      auto_reply_enabled: true,
       safety: {
-        whitelist_enforced: true,
+        whitelist_enforced: whitelist.length > 0,
         group_filter: "strict_no_group_reply",
         self_chat_loop_guard: true,
       },
-      whitelisted_numbers: [
-        "6281802731947",
-        "6281226300090",
-        "6289637370000",
-      ],
+      whitelisted_numbers: whitelist,
     },
   });
 }

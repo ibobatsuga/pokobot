@@ -15,8 +15,8 @@ export default function HumanAgentPage() {
   const [agents, setAgents] = useState([
     {
       id: "u1",
-      name: "Ibob Atsuga",
-      email: "ibob@fluxy.id",
+      name: "Super Admin",
+      email: "admin@pokobot.id",
       role: "Super Admin",
       status: "Online",
       activeChats: 3,

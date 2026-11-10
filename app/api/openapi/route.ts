@@ -32,7 +32,7 @@ export async function GET(request: Request) {
                   properties: {
                     chatId: {
                       type: "string",
-                      example: "6281802731947@c.us",
+                      example: "6281234567890@c.us",
                     },
                     text: {
                       type: "string",

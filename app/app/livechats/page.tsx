@@ -16,7 +16,7 @@ export default function LiveChatWidgetPage() {
   const [welcomeText, setWelcomeText] = useState(
     "Halo! Ada yang bisa kami bantu seputar Poko Omnichannel & AI CRM?"
   );
-  const [whatsappNumber, setWhatsappNumber] = useState("+6289637370000");
+  const [whatsappNumber, setWhatsappNumber] = useState("+6281234567890");
 
   const embedCode = `<script 
   src="https://ping-clone-poc.vercel.app/widget.js" 

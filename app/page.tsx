@@ -116,7 +116,7 @@ export default function PokoDashboardPage() {
     {
       id: "dev-1",
       name: "CS & Billing Official",
-      phone: "+62 818-0273-1947",
+      phone: "+62 812-3456-7890",
       status: "Connected",
       battery: "94%",
       autoReply: true,
@@ -125,7 +125,7 @@ export default function PokoDashboardPage() {
     {
       id: "dev-2",
       name: "Sales & Inbound Marketing",
-      phone: "+62 896-3737-0000",
+      phone: "+62 821-9876-5432",
       status: "Connected",
       battery: "88%",
       autoReply: true,
@@ -172,7 +172,7 @@ export default function PokoDashboardPage() {
     {
       id: "m-1",
       sender: "Budi Santoso",
-      phone: "+62 818-0273-1947",
+      phone: "+62 812-3456-7890",
       snippet: "Halo kak, ongkir ke Jagakarsa Jakarta Selatan berapa ya untuk paket 1kg?",
       intent: "Cek Ongkir Otomatis",
       status: "Dibalas AI (1.1s)",
@@ -192,7 +192,7 @@ export default function PokoDashboardPage() {
     {
       id: "m-3",
       sender: "Hendro Wijaya",
-      phone: "+62 812-2630-0090",
+      phone: "+62 857-1234-5678",
       snippet: "Bisa minta tolong dihubungkan ke tim sales langsung untuk negosiasi kontrak?",
       intent: "Eskalasi CS Manusia",
       status: "Takeover CS Agent",
@@ -221,7 +221,7 @@ export default function PokoDashboardPage() {
         {
           id: "1",
           name: "Budi Santoso",
-          phone: "+62 818-0273-1947",
+          phone: "+62 812-3456-7890",
           tag: "API Integration",
           tagColor: "bg-blue-50 text-blue-700 border-blue-200",
           value: "Rp 7.500.000",
@@ -250,7 +250,7 @@ export default function PokoDashboardPage() {
         {
           id: "3",
           name: "Hendro Wijaya",
-          phone: "+62 812-2630-0090",
+          phone: "+62 857-1234-5678",
           tag: "Enterprise Tier",
           tagColor: "bg-purple-50 text-purple-700 border-purple-200",
           value: "Rp 18.000.000",
@@ -540,7 +540,7 @@ export default function PokoDashboardPage() {
                 <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-xs text-stone-600 space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-stone-400">Target WhatsApp:</span>
-                    <span className="font-semibold text-stone-800">089637370000</span>
+                    <span className="font-semibold text-stone-800">WhatsApp Gateway Aktif</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-stone-400">Response Speed:</span>
@@ -548,7 +548,7 @@ export default function PokoDashboardPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-stone-400">Whitelist Safety:</span>
-                    <span className="font-semibold text-stone-800">3 Nomor Terverifikasi</span>
+                    <span className="font-semibold text-stone-800">Proteksi Anti-Loop Aktif</span>
                   </div>
                 </div>
               </div>

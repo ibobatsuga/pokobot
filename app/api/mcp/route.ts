@@ -17,7 +17,7 @@ const POKOBOT_MCP_TOOLS = [
       properties: {
         phone: {
           type: "string",
-          description: "Nomor WhatsApp tujuan dengan format internasional (contoh: 6281802731947 atau 6289637370000).",
+          description: "Nomor WhatsApp tujuan dengan format internasional (contoh: 6281234567890).",
         },
         message: {
           type: "string",
@@ -309,25 +309,25 @@ export async function POST(request: Request) {
           const limit = Math.min(Number(toolArgs.limit) || 5, 50);
           const mockChats = [
             {
-              id: "6281802731947@c.us",
-              name: "Budi Santoso",
-              phone: "+62 818-0273-1947",
+              id: "6281234567890@c.us",
+              name: "Pelanggan Baru (Lead 1)",
+              phone: "+62 812-3456-7890",
               lastMessage: "Halo kak, ongkir ke Jakarta Selatan berapa?",
               unreadCount: 1,
               stage: "New Inquiries",
             },
             {
-              id: "6281299887711@c.us",
-              name: "Siti Rahma",
-              phone: "+62 812-9988-7711",
+              id: "6282198765432@c.us",
+              name: "Pelanggan Terverifikasi (Lead 2)",
+              phone: "+62 821-9876-5432",
               lastMessage: "Saya mau transfer lewat QRIS BCA",
               unreadCount: 0,
               stage: "AI Qualifying",
             },
             {
-              id: "6281226300090@c.us",
-              name: "Hendro Wijaya",
-              phone: "+62 812-2630-0090",
+              id: "6285712345678@c.us",
+              name: "Pelanggan Bisnis (Lead 3)",
+              phone: "+62 857-1234-5678",
               lastMessage: "Bisa minta tolong dihubungkan ke sales?",
               unreadCount: 2,
               stage: "Sales Follow-up",
@@ -368,9 +368,9 @@ export async function POST(request: Request) {
           }
 
           const contacts = [
-            { name: "Budi Santoso", phone: "+62 818-0273-1947", tag: "API Integration", city: "Jakarta Selatan" },
-            { name: "Siti Rahma", phone: "+62 812-9988-7711", tag: "Paket Starter", city: "Bandung" },
-            { name: "Hendro Wijaya", phone: "+62 812-2630-0090", tag: "Enterprise", city: "Surabaya" },
+            { name: "Pelanggan Baru (Lead 1)", phone: "+62 812-3456-7890", tag: "API Integration", city: "Jakarta Selatan" },
+            { name: "Pelanggan Terverifikasi (Lead 2)", phone: "+62 821-9876-5432", tag: "Paket Starter", city: "Bandung" },
+            { name: "Pelanggan Bisnis (Lead 3)", phone: "+62 857-1234-5678", tag: "Enterprise", city: "Surabaya" },
           ].filter(
             (c) =>
               c.name.toLowerCase().includes(query) ||

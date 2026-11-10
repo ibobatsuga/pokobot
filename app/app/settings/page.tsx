@@ -55,7 +55,7 @@ export default function SettingsPage() {
   const [aiBaseUrl, setAiBaseUrl] = useState("https://api.openai.com/v1");
   const [selectedModel, setSelectedModel] = useState("gpt-4o");
   const [wahaBaseUrl, setWahaBaseUrl] = useState("http://localhost:3000");
-  const [whitelistInput, setWhitelistInput] = useState("6281802731947, 6281226300090, 6289637370000");
+  const [whitelistInput, setWhitelistInput] = useState("");
   const [saved, setSaved] = useState(false);
 
   // MCP Ping Test State
@@ -596,6 +596,7 @@ Header: Authorization (Bearer pk_live_fluxy_pokobot_enterprise)`;
                     rows={3}
                     value={whitelistInput}
                     onChange={(e) => setWhitelistInput(e.target.value)}
+                    placeholder="Contoh: 6281234567890, 6289876543210 (Biarkan kosong agar PokoBot dapat melayani semua chat baru masuk)"
                     className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-mono text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
                   />
                 </div>
