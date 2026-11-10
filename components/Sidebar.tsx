@@ -34,6 +34,7 @@ import {
   ChevronRight,
   Plus,
   Brain,
+  Key,
 } from "lucide-react";
 
 interface MenuItem {
@@ -178,6 +179,11 @@ export const MENU_GROUPS: MenuGroup[] = [
         title: "Setting Aplikasi",
         href: "/app/settings",
         icon: Sliders,
+      },
+      {
+        title: "API Keys & MCP",
+        href: "/app/settings",
+        icon: Key,
       },
       {
         title: "Top Up Credit",

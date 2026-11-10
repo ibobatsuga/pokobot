@@ -11,11 +11,207 @@ import {
   Sparkles,
   ExternalLink,
   Plus,
+  Smartphone,
+  Users,
+  Send,
+  Zap,
+  CheckCircle2,
+  Clock,
+  ArrowUpRight,
+  Radio,
+  MapPin,
+  CreditCard,
+  BatteryCharging,
+  FileText,
+  ShieldCheck,
+  Check,
+  ChevronRight,
+  Filter,
 } from "lucide-react";
 
 export default function PokoDashboardPage() {
-  const [autoReplyEnabled, setAutoReplyEnabled] = useState(false);
+  const [autoReplyEnabled, setAutoReplyEnabled] = useState(true);
 
+  // Ping KPI Stats Cards
+  const kpiStats = [
+    {
+      title: "Device WhatsApp",
+      value: "2 / 2",
+      unit: "Terkoneksi",
+      change: "100% Online",
+      changeType: "positive",
+      icon: Smartphone,
+      iconBg: "bg-emerald-50 text-emerald-600 border-emerald-200",
+      href: "/app/device",
+    },
+    {
+      title: "Database Kontak",
+      value: "3.480",
+      unit: "Kontak",
+      change: "+128 minggu ini",
+      changeType: "positive",
+      icon: Users,
+      iconBg: "bg-blue-50 text-blue-600 border-blue-200",
+      href: "/app/stores",
+    },
+    {
+      title: "Broadcast Terkirim",
+      value: "14.250",
+      unit: "Pesan",
+      change: "99.4% Anti-Ban",
+      changeType: "positive",
+      icon: Send,
+      iconBg: "bg-purple-50 text-purple-600 border-purple-200",
+      href: "/app/blash",
+    },
+    {
+      title: "Sisa Kuota AI",
+      value: "85.740",
+      unit: "Credits",
+      change: "Paket Business Pro",
+      changeType: "neutral",
+      icon: Zap,
+      iconBg: "bg-amber-50 text-amber-600 border-amber-200",
+      href: "/app/billing",
+    },
+  ];
+
+  // Quick Actions Ping Style
+  const quickActions = [
+    {
+      label: "Koneksi Device",
+      desc: "Scan QR WhatsApp",
+      href: "/app/device",
+      icon: Smartphone,
+    },
+    {
+      label: "Broadcast Baru",
+      desc: "Kirim massal anti-ban",
+      href: "/app/blash",
+      icon: Send,
+    },
+    {
+      label: "Data Training AI",
+      desc: "Atur SOP & dokumen",
+      href: "/app/auto-reply/finetunnel/create",
+      icon: Bot,
+    },
+    {
+      label: "Scraper Kontak",
+      desc: "Ekstrak Google Maps",
+      href: "/app/scrapping",
+      icon: MapPin,
+    },
+    {
+      label: "CRM Chat App",
+      desc: "Multi CS & Takeover",
+      href: "/app/omnichannel-crm",
+      icon: MessageSquare,
+      highlight: true,
+    },
+  ];
+
+  // Connected Devices (Ping Device Health)
+  const connectedDevices = [
+    {
+      id: "dev-1",
+      name: "CS & Billing Official",
+      phone: "+62 818-0273-1947",
+      status: "Connected",
+      battery: "94%",
+      autoReply: true,
+      lastSync: "Baru saja",
+    },
+    {
+      id: "dev-2",
+      name: "Sales & Inbound Marketing",
+      phone: "+62 896-3737-0000",
+      status: "Connected",
+      battery: "88%",
+      autoReply: true,
+      lastSync: "1 min lalu",
+    },
+  ];
+
+  // Recent Broadcasts (Ping Campaign Reports)
+  const recentBroadcasts = [
+    {
+      id: "b-1",
+      name: "Promo Gajian Flash Sale 50%",
+      target: "1.200 Kontak",
+      success: 1194,
+      failed: 6,
+      rate: "99.5%",
+      date: "Hari ini, 10:15 WIB",
+      status: "Selesai",
+    },
+    {
+      id: "b-2",
+      name: "Nudge Keranjang Belanja Belum Checkout",
+      target: "450 Kontak",
+      success: 450,
+      failed: 0,
+      rate: "100%",
+      date: "Kemarin, 16:30 WIB",
+      status: "Selesai",
+    },
+    {
+      id: "b-3",
+      name: "Edukasi Tips Perawatan & Katalog Baru",
+      target: "850 Kontak",
+      success: 842,
+      failed: 8,
+      rate: "99.1%",
+      date: "08 Nov 2026",
+      status: "Selesai",
+    },
+  ];
+
+  // Live Inbound Activity Feed
+  const recentMessages = [
+    {
+      id: "m-1",
+      sender: "Budi Santoso",
+      phone: "+62 818-0273-1947",
+      snippet: "Halo kak, ongkir ke Jagakarsa Jakarta Selatan berapa ya untuk paket 1kg?",
+      intent: "Cek Ongkir Otomatis",
+      status: "Dibalas AI (1.1s)",
+      statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      time: "2 min lalu",
+    },
+    {
+      id: "m-2",
+      sender: "Siti Rahma",
+      phone: "+62 812-9988-7711",
+      snippet: "Saya mau transfer lewat QRIS BCA bisa dikirim kodenya?",
+      intent: "Kirim QRIS Pembayaran",
+      status: "Dibalas AI (0.9s)",
+      statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      time: "8 min lalu",
+    },
+    {
+      id: "m-3",
+      sender: "Hendro Wijaya",
+      phone: "+62 812-2630-0090",
+      snippet: "Bisa minta tolong dihubungkan ke tim sales langsung untuk negosiasi kontrak?",
+      intent: "Eskalasi CS Manusia",
+      status: "Takeover CS Agent",
+      statusColor: "bg-blue-50 text-blue-700 border-blue-200",
+      time: "15 min lalu",
+    },
+    {
+      id: "m-4",
+      sender: "Dewi Lestari",
+      phone: "+62 856-1234-5678",
+      snippet: "Katalog skincare brightening yang cocok buat kulit sensitif ada kak?",
+      intent: "Kirim Katalog PDF",
+      status: "Dibalas AI (1.4s)",
+      statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      time: "24 min lalu",
+    },
+  ];
+
+  // CRM Pipeline Stages
   const pipelineStages = [
     {
       title: "New Inquiries",
@@ -106,7 +302,7 @@ export default function PokoDashboardPage() {
           tagColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
           value: "Rp 38.000.000",
           time: "Kemarin",
-          summary: "Invoice lunas via Duitku Payment Gateway.",
+          summary: "Invoice lunas via Payment Gateway.",
           dark: false,
         },
       ],
@@ -116,10 +312,96 @@ export default function PokoDashboardPage() {
   return (
     <PokoAppShell
       title="Dashboard Stats"
-      subtitle="Ringkasan performa percakapan WhatsApp, otomasi AI bot, dan aktivitas leads"
+      subtitle="Ringkasan performa bisnis, integrasi WhatsApp, status perangkat, dan pipeline CRM"
+      actionButton={
+        <Link
+          href="/app/blash"
+          className="h-9 px-3.5 rounded-xl text-xs font-semibold bg-poko-charcoal text-white hover:bg-black transition-all shadow-xs flex items-center gap-1.5"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>Buat Broadcast</span>
+        </Link>
+      }
     >
-      <div className="space-y-8">
-        {/* HERO KPI SECTION: Ronas IT Warm Minimalist Card */}
+      <div className="space-y-8 pb-12">
+        {/* 1. QUICK ACTIONS BAR (Ping Quick Action Suite) */}
+        <div className="bg-white rounded-2xl border border-poko-border p-3 shadow-subtle flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 pl-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="text-xs font-bold text-poko-charcoal uppercase tracking-wider">
+              Aksi Cepat:
+            </span>
+          </div>
+
+          <div className="flex items-center flex-wrap gap-2">
+            {quickActions.map((qa, i) => {
+              const Icon = qa.icon;
+              return (
+                <Link
+                  key={i}
+                  href={qa.href}
+                  className={`flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all border ${
+                    qa.highlight
+                      ? "bg-poko-charcoal text-white border-poko-charcoal hover:bg-black"
+                      : "bg-stone-50 text-stone-700 border-stone-200/80 hover:bg-stone-100"
+                  }`}
+                >
+                  <Icon
+                    className={`w-3.5 h-3.5 ${
+                      qa.highlight ? "text-emerald-400" : "text-stone-500"
+                    }`}
+                  />
+                  <span>{qa.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 2. PING KPI STATS SUMMARY CARDS (4 Cards Row) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {kpiStats.map((stat, i) => {
+            const Icon = stat.icon;
+            return (
+              <Link
+                key={i}
+                href={stat.href}
+                className="group p-5 rounded-2xl bg-white border border-poko-border shadow-subtle hover:border-stone-400 transition-all block relative overflow-hidden"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-medium text-stone-500">{stat.title}</span>
+                  <div
+                    className={`w-8 h-8 rounded-xl flex items-center justify-center border ${stat.iconBg}`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </div>
+                </div>
+
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold text-poko-charcoal tracking-tight">
+                    {stat.value}
+                  </span>
+                  <span className="text-xs text-stone-500 font-medium">{stat.unit}</span>
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between text-[11px]">
+                  <span
+                    className={`font-semibold ${
+                      stat.changeType === "positive"
+                        ? "text-emerald-600"
+                        : "text-stone-600"
+                    }`}
+                  >
+                    {stat.change}
+                  </span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-stone-300 group-hover:text-stone-700 transition-colors" />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* 3. HERO KPI & AI ACTIVITY SECTION (Ronas IT Warm Minimalist Card) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left 2 Cols: Linen Card with Radial Gauge & Charts */}
           <div className="lg:col-span-2 rounded-3xl bg-poko-linen border border-stone-200/60 p-7 flex flex-col justify-between shadow-subtle relative overflow-hidden">
@@ -168,7 +450,9 @@ export default function PokoDashboardPage() {
                     <span className="text-2xl font-bold text-poko-charcoal">86%</span>
                   </div>
                 </div>
-                <span className="text-[11px] font-medium text-stone-500 mt-1">Otomasi AI Berhasil</span>
+                <span className="text-[11px] font-medium text-stone-500 mt-1">
+                  Otomasi AI Berhasil
+                </span>
               </div>
             </div>
 
@@ -224,14 +508,14 @@ export default function PokoDashboardPage() {
                 <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center">
                   <Bot className="w-5 h-5" />
                 </div>
-                <span className="text-[11px] font-mono px-2 py-1 rounded-md bg-stone-100 text-stone-600">
-                  AI Active
+                <span className="text-[11px] font-mono px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
+                  Engine Aktif
                 </span>
               </div>
 
               <h3 className="font-bold text-base text-poko-charcoal">PokoBot AI Engine</h3>
               <p className="text-xs text-stone-500 mt-1">
-                Didukung AI Engine cerdas dengan proteksi self-chat loop & filter grup anti-spam.
+                Didukung arsitektur WAHA & AI Engine cerdas dengan proteksi loop & keyword guard.
               </p>
 
               <div className="mt-5 space-y-3">
@@ -280,7 +564,182 @@ export default function PokoDashboardPage() {
           </div>
         </div>
 
-        {/* KANBAN CRM PIPELINE PREVIEW */}
+        {/* 4. DUAL MIDDLE SECTION: DEVICE HEALTH & RECENT BROADCASTS vs LIVE INBOUND FEED */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column: Device Monitor + Recent Broadcasts */}
+          <div className="space-y-6">
+            {/* Device Monitor Widget */}
+            <div className="bg-white rounded-3xl border border-poko-border p-6 shadow-subtle">
+              <div className="flex items-center justify-between pb-4 border-b border-stone-100 mb-4">
+                <div className="flex items-center gap-2">
+                  <Smartphone className="w-4 h-4 text-emerald-600" />
+                  <h3 className="font-bold text-sm text-poko-charcoal">
+                    Perangkat WhatsApp Terhubung
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    2 Online
+                  </span>
+                </div>
+                <Link
+                  href="/app/device"
+                  className="text-xs font-semibold text-stone-600 hover:text-black flex items-center gap-1"
+                >
+                  <span>Kelola Device</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
+              <div className="space-y-3">
+                {connectedDevices.map((dev) => (
+                  <div
+                    key={dev.id}
+                    className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/70 flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-emerald-600">
+                        <Smartphone className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-xs text-poko-charcoal">{dev.name}</p>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        </div>
+                        <p className="text-[11px] text-stone-500 font-mono mt-0.5">{dev.phone}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-xs">
+                      <div className="flex items-center gap-1 text-stone-500">
+                        <BatteryCharging className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-[11px] font-medium">{dev.battery}</span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-100/70 text-emerald-800">
+                        Auto-Reply
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent Broadcasts Widget */}
+            <div className="bg-white rounded-3xl border border-poko-border p-6 shadow-subtle">
+              <div className="flex items-center justify-between pb-4 border-b border-stone-100 mb-4">
+                <div className="flex items-center gap-2">
+                  <Send className="w-4 h-4 text-purple-600" />
+                  <h3 className="font-bold text-sm text-poko-charcoal">
+                    Laporan Broadcast Terakhir
+                  </h3>
+                </div>
+                <Link
+                  href="/app/blash"
+                  className="text-xs font-semibold text-stone-600 hover:text-black flex items-center gap-1"
+                >
+                  <span>Lihat Semua</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
+              <div className="space-y-3">
+                {recentBroadcasts.map((b) => (
+                  <div
+                    key={b.id}
+                    className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/70 space-y-2"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-bold text-xs text-poko-charcoal">{b.name}</h4>
+                        <p className="text-[11px] text-stone-500 mt-0.5">
+                          {b.target} • {b.date}
+                        </p>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        {b.rate} Sukses
+                      </span>
+                    </div>
+
+                    {/* Mini Progress Bar */}
+                    <div className="w-full bg-stone-200 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-emerald-600 h-full rounded-full w-[99.5%]"></div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-stone-500 pt-0.5">
+                      <span>Terkirim: {b.success.toLocaleString()} pesan</span>
+                      <span>Gagal: {b.failed}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Live Inbound WhatsApp Activity */}
+          <div className="bg-white rounded-3xl border border-poko-border p-6 shadow-subtle flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-4 border-b border-stone-100 mb-4">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-emerald-600" />
+                  <h3 className="font-bold text-sm text-poko-charcoal">
+                    Aktivitas Chat WhatsApp Masuk
+                  </h3>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                </div>
+                <Link
+                  href="/app/omnichannel-crm"
+                  className="text-xs font-semibold text-stone-600 hover:text-black flex items-center gap-1"
+                >
+                  <span>Buka Live Chat</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
+              <div className="space-y-3">
+                {recentMessages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/70 space-y-2 hover:bg-stone-100/80 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs text-poko-charcoal">{msg.sender}</span>
+                        <span className="text-[10px] text-stone-400 font-mono">{msg.phone}</span>
+                      </div>
+                      <span className="text-[10px] text-stone-400">{msg.time}</span>
+                    </div>
+
+                    <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed bg-white p-2.5 rounded-xl border border-stone-200/50">
+                      &ldquo;{msg.snippet}&rdquo;
+                    </p>
+
+                    <div className="flex items-center justify-between pt-1 text-[11px]">
+                      <div className="flex items-center gap-1.5">
+                        <Sparkles className="w-3 h-3 text-purple-600" />
+                        <span className="font-medium text-stone-600">Intent: {msg.intent}</span>
+                      </div>
+                      <span
+                        className={`px-2 py-0.5 rounded-md font-semibold text-[10px] border ${msg.statusColor}`}
+                      >
+                        {msg.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-4 mt-4 border-t border-stone-100">
+              <Link
+                href="/app/omnichannel-crm"
+                className="w-full py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
+              >
+                <span>Lihat Semua Percakapan di CRM</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* 5. KANBAN CRM PIPELINE PREVIEW (Preserved from Current Dashboard) */}
         <div>
           <div className="flex items-center justify-between mb-5">
             <div>
@@ -293,7 +752,7 @@ export default function PokoDashboardPage() {
             <div className="flex items-center gap-2">
               <Link
                 href="/app/omnichannel-crm/pipeline"
-                className="px-3.5 py-1.5 rounded-xl border border-poko-border text-xs font-semibold text-stone-600 bg-white hover:bg-stone-50 flex items-center gap-1.5"
+                className="h-9 px-3.5 rounded-xl border border-poko-border text-xs font-semibold text-stone-600 bg-white hover:bg-stone-50 flex items-center gap-1.5 transition-colors"
               >
                 <span>Lihat Full Pipeline Board</span>
                 <ExternalLink className="w-3.5 h-3.5" />
