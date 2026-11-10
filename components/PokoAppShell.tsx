@@ -55,7 +55,7 @@ export function PokoAppShell({
               href="/app/omnichannel-crm"
               className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-poko-charcoal text-white hover:bg-black transition-all shadow-xs shrink-0"
             >
-              <span>CRM Chat App 👑</span>
+              <span>CRM Chat App</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
           </div>

@@ -62,8 +62,6 @@ export const MENU_GROUPS: MenuGroup[] = [
         title: "CRM Chat App",
         href: "/app/omnichannel-crm",
         icon: MessageSquare,
-        badge: "👑",
-        badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
       },
       {
         title: "CRM Pipeline",
@@ -108,7 +106,7 @@ export const MENU_GROUPS: MenuGroup[] = [
     ],
   },
   {
-    groupTitle: "AI AUTOMATION 🤖",
+    groupTitle: "AI AUTOMATION",
     items: [
       {
         title: "Webhook Rules",

@@ -274,7 +274,7 @@ export default function PokoDashboardPage() {
                 className="w-full py-2.5 px-4 rounded-xl bg-poko-linen text-poko-charcoal font-semibold text-xs flex items-center justify-center gap-2 hover:bg-stone-200 transition-all border border-stone-300/60"
               >
                 <MessageSquare className="w-4 h-4 text-emerald-600" />
-                Buka CRM Chat App 👑
+                Buka CRM Chat App
               </Link>
             </div>
           </div>
