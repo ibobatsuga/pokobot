@@ -90,9 +90,9 @@ export default function PokoDashboardPage() {
     },
     {
       title: "Sisa Kuota AI",
-      value: "10.000",
+      value: "50",
       unit: "Credits",
-      change: "Saldo Starter Baru",
+      change: "Kuota User Gratis",
       changeType: "positive",
       icon: Zap,
       iconBg: "bg-amber-50 text-amber-600 border-amber-200",
@@ -307,41 +307,6 @@ export default function PokoDashboardPage() {
                 <p className="text-xs text-stone-600 mt-1">
                   0 kontak aktif • Siap memproses pesan WhatsApp baru secara otomatis
                 </p>
-              </div>
-
-              {/* Semicircular Radial Gauge */}
-              <div className="flex flex-col items-center">
-                <div className="relative w-36 h-20 flex items-end justify-center overflow-hidden">
-                  <svg className="w-36 h-36 transform -rotate-180" viewBox="0 0 100 100">
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="40"
-                      fill="transparent"
-                      stroke="#e2e3d5"
-                      strokeWidth="10"
-                      strokeDasharray="251.2"
-                      strokeDashoffset="125.6"
-                    />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="40"
-                      fill="transparent"
-                      stroke="#10b981"
-                      strokeWidth="10"
-                      strokeDasharray="251.2"
-                      strokeDashoffset="125.6"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <div className="absolute bottom-1 text-center">
-                    <span className="text-xl font-bold text-emerald-700">100%</span>
-                  </div>
-                </div>
-                <span className="text-[11px] font-medium text-stone-500 mt-1">
-                  Sistem AI Siap Digunakan
-                </span>
               </div>
             </div>
 

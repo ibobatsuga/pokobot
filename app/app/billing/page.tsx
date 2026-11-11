@@ -42,18 +42,18 @@ export default function BillingPage() {
         <div className="p-7 rounded-3xl bg-poko-linen border border-stone-300/60 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider block mb-1">
-              Sisa Saldo & Kuota AI Starter
+              Sisa Saldo & Kuota AI Gratis
             </span>
-            <h2 className="text-3xl font-bold text-poko-charcoal">10.000 Credits</h2>
+            <h2 className="text-3xl font-bold text-poko-charcoal">50 Credits</h2>
             <p className="text-xs text-stone-600 mt-1">
-              Saldo Kredit Starter (Rp 0 Top-up) — siap untuk pengujian & pesan awal
+              Saldo Kredit Gratis (50 Credits) — siap untuk pengujian &amp; pesan awal
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <span className="px-3 py-1.5 rounded-full bg-white text-emerald-800 text-xs font-bold border border-emerald-200 flex items-center gap-1.5 shadow-xs">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              Paket Starter (Akun Baru)
+              Paket Gratis (50 Credits)
             </span>
           </div>
         </div>
@@ -105,7 +105,7 @@ export default function BillingPage() {
               <Receipt className="w-8 h-8 text-stone-300 mx-auto" />
               <p className="text-xs font-bold text-poko-charcoal">Belum Ada Riwayat Transaksi</p>
               <p className="text-[11px] text-stone-500">
-                Saldo awal 10.000 Credits Starter Anda telah aktif. Faktur pembelian top up berikutnya akan tersimpan di sini.
+                Saldo awal 50 Credits Gratis Anda telah aktif. Faktur pembelian top up berikutnya akan tersimpan di sini.
               </p>
             </div>
           ) : (
