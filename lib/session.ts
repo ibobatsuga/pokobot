@@ -1,6 +1,7 @@
 export const SESSION_COOKIE_NAME = "pokobot_session";
 export const ACCOUNT_COOKIE_NAME = "pokobot_account";
 export const OAUTH_STATE_COOKIE_NAME = "pokobot_oauth_state";
+export const USER_API_KEY_PREFIX = "pk_user_";
 
 export interface AuthUser {
   email: string;
@@ -13,6 +14,12 @@ interface SignedSessionPayload extends AuthUser {
   exp: number;
 }
 
+interface SignedUserApiKeyPayload {
+  typ: "user_api_key";
+  email: string;
+  iat: number;
+}
+
 export interface StoredAccountPayload {
   email: string;
   name: string;
@@ -21,11 +28,14 @@ export interface StoredAccountPayload {
 }
 
 function getAuthSecret(): string {
-  return (
-    process.env.AUTH_SECRET ||
-    process.env.WAHA_API_KEY ||
-    "pokobot-fluxy-default-session-secret"
-  );
+  const secret = process.env.AUTH_SECRET || process.env.WAHA_API_KEY;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("AUTH_SECRET is required in production");
+    }
+    return "pokobot-fluxy-dev-only-secret";
+  }
+  return secret;
 }
 
 function toBase64Url(bytes: Uint8Array): string {
@@ -111,9 +121,29 @@ export async function verifySessionToken(token?: string | null): Promise<AuthUse
   if (!payload || !payload.email || !payload.exp) return null;
   if (payload.exp < Math.floor(Date.now() / 1000)) return null;
   return {
-    email: payload.email,
+    email: payload.email.toLowerCase(),
     name: payload.name,
     avatar: payload.avatar,
     provider: payload.provider,
   };
+}
+
+export async function createUserApiKey(email: string): Promise<string> {
+  const payload: SignedUserApiKeyPayload = {
+    typ: "user_api_key",
+    email: email.trim().toLowerCase(),
+    iat: Math.floor(Date.now() / 1000),
+  };
+  const signed = await signPayload(payload);
+  return `${USER_API_KEY_PREFIX}${signed}`;
+}
+
+export async function verifyUserApiKey(authHeader?: string | null): Promise<string | null> {
+  if (!authHeader) return null;
+  const raw = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : authHeader.trim();
+  if (!raw.startsWith(USER_API_KEY_PREFIX)) return null;
+  const token = raw.slice(USER_API_KEY_PREFIX.length);
+  const payload = await verifyPayload<SignedUserApiKeyPayload>(token);
+  if (!payload || payload.typ !== "user_api_key" || !payload.email) return null;
+  return payload.email.trim().toLowerCase();
 }

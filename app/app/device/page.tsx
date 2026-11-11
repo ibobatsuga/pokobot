@@ -18,6 +18,7 @@ import {
   saveConnectedDevices,
   getActiveSessionName,
   setActiveSessionName,
+  setActiveTenantEmail,
   formatWhatsAppNumber,
   ConnectedDeviceItem,
 } from "@/lib/wahaClient";
@@ -41,6 +42,17 @@ export default function WhatsappDevicePage() {
   const loadSessions = useCallback(async () => {
     setLoadingSessions(true);
     try {
+      const meRes = await fetch("/api/auth/me", { cache: "no-store" });
+      const meData = await meRes.json().catch(() => ({}));
+      if (!meData?.user?.email) {
+        setActiveTenantEmail(null);
+        setSessions([]);
+        setActiveSession("");
+        setLoadingSessions(false);
+        return;
+      }
+
+      setActiveTenantEmail(meData.user.email);
       const savedDevices = getSavedConnectedDevices();
       const savedLabelMap = new Map(savedDevices.map((d) => [d.session, d.label]));
 

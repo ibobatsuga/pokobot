@@ -272,10 +272,9 @@ export function Sidebar({
                 const mapped: ConnectedDeviceItem[] = wahaData.sessions
                   .filter((s: any) => s.status === "WORKING" || s.me?.id)
                   .map((s: any) => ({
-                    sessionName: s.name || "default",
+                    session: s.name || "default",
                     label: s.label || s.name || "WhatsApp",
                     phone: formatWhatsAppNumber(s.me?.id) || "Terhubung",
-                    pushName: s.me?.pushName || undefined,
                     status: s.status || "WORKING",
                   }));
                 saveConnectedDevices(mapped);

@@ -59,6 +59,25 @@ export function WahaQrConnector({
         );
         const data = await res.json();
 
+        if (res.status === 409 || data.status === "CONFLICT") {
+          setErrorMsg(
+            data.error ||
+              "Nomor WhatsApp ini sedang aktif terhubung pada akun PokoBot lain. Putuskan di akun lama terlebih dahulu."
+          );
+          setQrImageDataUrl(null);
+          setStatus("ERROR");
+          setLoading(false);
+          return;
+        }
+
+        if (res.status === 401) {
+          setErrorMsg("Sesi login berakhir. Silakan login kembali untuk menghubungkan WhatsApp.");
+          setQrImageDataUrl(null);
+          setStatus("ERROR");
+          setLoading(false);
+          return;
+        }
+
         if (data.configured === false) {
           setQrImageDataUrl(null);
           setStatus("UNCONFIGURED");

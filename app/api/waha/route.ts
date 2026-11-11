@@ -7,21 +7,55 @@ import {
   unscopeSessionForTenant,
 } from "@/lib/tenant";
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Waha-Url, X-Waha-Api-Key",
-};
+const ALLOWED_ORIGINS = new Set([
+  "https://pokobot.fluxy.id",
+  "https://ping-clone-poc.vercel.app",
+  "http://localhost:3000",
+]);
+
+function getCorsHeaders(req?: NextRequest) {
+  const origin = req?.headers.get("origin") || "";
+  const allowOrigin = ALLOWED_ORIGINS.has(origin) ? origin : "https://pokobot.fluxy.id";
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    Vary: "Origin",
+  };
+}
+
+function isDisallowedWahaOverride(rawUrl: string): boolean {
+  if (!rawUrl) return false;
+  return /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|169\.254\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?/i.test(
+    rawUrl
+  );
+}
 
 function resolveWahaConfig(req: NextRequest, body?: any) {
-  const headerUrl = req.headers.get("x-waha-url") || req.nextUrl.searchParams.get("wahaUrl") || body?.wahaUrl;
-  const headerKey = req.headers.get("x-waha-api-key") || req.nextUrl.searchParams.get("wahaApiKey") || body?.wahaApiKey;
+  const callerUrl = (
+    req.headers.get("x-waha-url") ||
+    req.nextUrl.searchParams.get("wahaUrl") ||
+    body?.wahaUrl ||
+    ""
+  )
+    .toString()
+    .trim();
 
-  const rawUrl = (headerUrl || process.env.WAHA_BASE_URL || "").trim().replace(/\/+$/, "");
-  const apiKey = (headerKey || process.env.WAHA_API_KEY || "").trim();
-
-  const isLocalUrl = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?/i.test(rawUrl);
   const isCloudEnv = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
+  if (callerUrl && isDisallowedWahaOverride(callerUrl) && isCloudEnv) {
+    return {
+      configured: false,
+      error: "Backend WAHA tidak boleh menggunakan localhost pada server Cloud.",
+      code: "WAHA_LOCALHOST_BLOCKED",
+      wahaUrl: "",
+      apiKey: "",
+    };
+  }
+
+  // Strictly ignore external caller URL/Key overrides to prevent SSRF or credential hijacking
+  const rawUrl = (process.env.WAHA_BASE_URL || "").trim().replace(/\/+$/, "");
+  const apiKey = (process.env.WAHA_API_KEY || "").trim();
 
   if (!rawUrl) {
     return {
@@ -33,7 +67,7 @@ function resolveWahaConfig(req: NextRequest, body?: any) {
     };
   }
 
-  if (isLocalUrl && isCloudEnv) {
+  if (isDisallowedWahaOverride(rawUrl) && isCloudEnv) {
     return {
       configured: false,
       error: "Backend WAHA tidak boleh menggunakan localhost pada server Cloud.",
@@ -80,11 +114,12 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
   }
 }
 
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+export async function OPTIONS(req: NextRequest) {
+  return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
 }
 
 export async function GET(req: NextRequest) {
+  const CORS_HEADERS = getCorsHeaders(req);
   const action = req.nextUrl.searchParams.get("action") || "sessions";
   const session = req.nextUrl.searchParams.get("session") || "default";
   const label = req.nextUrl.searchParams.get("label") || session;
@@ -187,6 +222,23 @@ export async function GET(req: NextRequest) {
         `${wahaUrl}/api/sessions/${encodeURIComponent(scopedSession)}?owner=${encodeURIComponent(ownerEmail)}`,
         { headers }
       );
+
+      if (infoRes.status === 409) {
+        const conflictBody = await infoRes.json().catch(() => ({}));
+        return NextResponse.json(
+          {
+            configured: true,
+            connected: false,
+            session: cleanSessionName,
+            status: "CONFLICT",
+            error:
+              conflictBody?.error ||
+              "Nomor WhatsApp ini sedang aktif terhubung pada akun PokoBot lain.",
+            qrImageDataUrl: null,
+          },
+          { status: 409, headers: CORS_HEADERS }
+        );
+      }
 
       if (infoRes.ok) {
         sessionInfo = await infoRes.json();
@@ -319,6 +371,17 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const CORS_HEADERS = getCorsHeaders(req);
+
+  const reqOrigin = req.headers.get("origin");
+  if (
+    reqOrigin &&
+    !ALLOWED_ORIGINS.has(reqOrigin) &&
+    reqOrigin !== req.nextUrl.origin
+  ) {
+    return NextResponse.json({ ok: false, error: "Forbidden origin" }, { status: 403, headers: CORS_HEADERS });
+  }
+
   let body: any = {};
   try {
     body = await req.json();
@@ -345,6 +408,13 @@ export async function POST(req: NextRequest) {
   const user = await verifySessionToken(req.cookies.get(SESSION_COOKIE_NAME)?.value);
 
   try {
+    if (!user?.email) {
+      return NextResponse.json(
+        { ok: false, error: "Silakan login terlebih dahulu untuk mengelola perangkat WhatsApp." },
+        { status: 401, headers: CORS_HEADERS }
+      );
+    }
+
     if (action === "test") {
       const start = Date.now();
       const res = await fetchWithTimeout(`${wahaUrl}/api/version`, { headers: buildWahaHeaders(apiKey) });
@@ -354,13 +424,6 @@ export async function POST(req: NextRequest) {
       }
       const versionData = await res.json().catch(() => ({}));
       return NextResponse.json({ ok: true, latencyMs, version: versionData?.version || "Active" }, { headers: CORS_HEADERS });
-    }
-
-    if (!user?.email) {
-      return NextResponse.json(
-        { ok: false, error: "Silakan login terlebih dahulu untuk mengelola perangkat WhatsApp." },
-        { status: 401, headers: CORS_HEADERS }
-      );
     }
 
     const ownerEmail = user.email.toLowerCase();

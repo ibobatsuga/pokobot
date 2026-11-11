@@ -2,7 +2,7 @@ import crypto from "crypto";
 
 export function getTenantPrefix(email: string): string {
   const normalized = email.trim().toLowerCase();
-  const hash = crypto.createHash("sha256").update(normalized).digest("hex").slice(0, 10);
+  const hash = crypto.createHash("sha256").update(normalized).digest("hex").slice(0, 12);
   return `t_${hash}_`;
 }
 

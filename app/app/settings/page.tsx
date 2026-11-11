@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PokoAppShell } from "@/components/PokoAppShell";
 import {
   Sliders,
@@ -26,25 +26,41 @@ import {
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<"api-keys" | "mcp" | "ai-engine" | "waha">("mcp");
 
-  // API Keys State
+  // API Keys State (loads personal signed API key bound strictly to logged-in user)
+  const [personalKey, setPersonalKey] = useState<string>("Memuat Personal API Key...");
   const [apiKeys, setApiKeys] = useState([
     {
-      id: "key-1",
-      name: "Claude Desktop & Cursor IDE Key",
-      prefix: "pk_live_fluxy_pokobot_enterprise",
-      created: "Hari ini",
-      scopes: ["messages:send", "messages:read", "crm:deals", "mcp:full"],
-      status: "Active",
-    },
-    {
-      id: "key-2",
-      name: "Antigravity Assistant Agent",
-      prefix: "pk_live_fluxy_antigravity_agent_99",
-      created: "08 Nov 2026",
-      scopes: ["mcp:full", "knowledge:query"],
+      id: "key-personal",
+      name: "Personal Signed API Key (Hanya Akses WhatsApp Akun Anda)",
+      prefix: "Memuat...",
+      created: "Terikat Email Akun",
+      scopes: ["messages:send", "messages:read", "mcp:tenant"],
       status: "Active",
     },
   ]);
+
+  useEffect(() => {
+    fetch("/api/auth/api-key", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.apiKey) {
+          setPersonalKey(data.apiKey);
+          setApiKeys([
+            {
+              id: "key-personal",
+              name: `Personal API Key (${data.email})`,
+              prefix: data.apiKey,
+              created: "Terikat Email Akun",
+              scopes: ["messages:send", "messages:read", "mcp:tenant"],
+              status: "Active",
+            },
+          ]);
+        } else {
+          setPersonalKey("LOGIN_REQUIRED_FOR_PERSONAL_KEY");
+        }
+      })
+      .catch(() => setPersonalKey("LOGIN_REQUIRED_FOR_PERSONAL_KEY"));
+  }, []);
 
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [copiedConfig, setCopiedConfig] = useState(false);
@@ -100,10 +116,10 @@ export default function SettingsPage() {
       "args": [
         "-y",
         "@modelcontextprotocol/server-fetch",
-        "https://ping-clone-poc.vercel.app/api/mcp"
+        "https://pokobot.fluxy.id/api/mcp"
       ],
       "env": {
-        "POKOBOT_API_KEY": "pk_live_fluxy_pokobot_enterprise"
+        "POKOBOT_API_KEY": "${personalKey}"
       }
     }
   }
@@ -112,9 +128,9 @@ export default function SettingsPage() {
   const cursorConfig = `{
   "mcpServers": {
     "pokobot": {
-      "url": "https://ping-clone-poc.vercel.app/api/mcp",
+      "url": "https://pokobot.fluxy.id/api/mcp",
       "headers": {
-        "Authorization": "Bearer pk_live_fluxy_pokobot_enterprise"
+        "Authorization": "Bearer ${personalKey}"
       }
     }
   }
@@ -123,20 +139,20 @@ export default function SettingsPage() {
   const antigravityConfig = `{
   "mcpServers": {
     "pokobot": {
-      "url": "https://ping-clone-poc.vercel.app/api/mcp",
+      "url": "https://pokobot.fluxy.id/api/mcp",
       "headers": {
-        "Authorization": "Bearer pk_live_fluxy_pokobot_enterprise"
+        "Authorization": "Bearer ${personalKey}"
       }
     }
   }
 }`;
 
   const gptCustomAction = `URL OpenAPI Schema:
-https://ping-clone-poc.vercel.app/api/openapi
+https://pokobot.fluxy.id/api/openapi
 
 Authentication:
 Type: API Key
-Header: Authorization (Bearer pk_live_fluxy_pokobot_enterprise)`;
+Header: Authorization (Bearer ${personalKey})`;
 
   return (
     <PokoAppShell

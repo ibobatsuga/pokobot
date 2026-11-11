@@ -1,4 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { SESSION_COOKIE_NAME, verifySessionToken, verifyUserApiKey } from "@/lib/session";
+import { scopeSessionForTenant } from "@/lib/tenant";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -207,7 +209,7 @@ export async function GET(request: Request) {
 }
 
 // POST: JSON-RPC 2.0 MCP Request Handler
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   let body: any;
   try {
     body = await request.json();
@@ -272,6 +274,10 @@ export async function POST(request: Request) {
       const toolName = params?.name;
       const toolArgs = params?.arguments || {};
 
+      const cookieUser = await verifySessionToken(request.cookies.get(SESSION_COOKIE_NAME)?.value);
+      const apiKeyEmail = await verifyUserApiKey(request.headers.get("authorization"));
+      const ownerEmail = (apiKeyEmail || cookieUser?.email || "").trim().toLowerCase();
+
       switch (toolName) {
         case "pokobot_send_whatsapp_message": {
           const { phone, message, session = "default" } = toolArgs;
@@ -288,6 +294,43 @@ export async function POST(request: Request) {
               { status: 400, headers: CORS_HEADERS }
             );
           }
+
+          if (ownerEmail) {
+            const wahaUrl = (process.env.WAHA_BASE_URL || "").trim().replace(/\/+$/, "");
+            if (wahaUrl && !/^https?:\/\/(localhost|127\.0\.0\.1)/i.test(wahaUrl)) {
+              const cleanedDigits = String(phone).replace(/[^0-9]/g, "");
+              const chatId = String(phone).includes("@") ? String(phone) : `${cleanedDigits}@c.us`;
+              const headers: Record<string, string> = {
+                "Content-Type": "application/json",
+                "X-Owner-Email": ownerEmail,
+              };
+              if (process.env.WAHA_API_KEY) headers["X-Api-Key"] = process.env.WAHA_API_KEY;
+              const dispatchRes = await fetch(`${wahaUrl}/api/sendText`, {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                  chatId,
+                  text: String(message),
+                  session: scopeSessionForTenant(ownerEmail, String(session || "default")),
+                }),
+              });
+              if (!dispatchRes.ok) {
+                const errJson = await dispatchRes.json().catch(() => ({}));
+                return NextResponse.json(
+                  {
+                    jsonrpc: "2.0",
+                    id,
+                    error: {
+                      code: -32000,
+                      message: errJson?.error || `Gagal mengirim WhatsApp (${dispatchRes.status})`,
+                    },
+                  },
+                  { status: dispatchRes.status >= 400 && dispatchRes.status < 500 ? dispatchRes.status : 502, headers: CORS_HEADERS }
+                );
+              }
+            }
+          }
+
           return NextResponse.json(
             {
               jsonrpc: "2.0",
@@ -296,7 +339,7 @@ export async function POST(request: Request) {
                 content: [
                   {
                     type: "text",
-                    text: `[PokoBot WAHA] Pesan WhatsApp berhasil dikirim ke ${phone} via session '${session}': "${message}"`,
+                    text: `[PokoBot WAHA] Pesan WhatsApp${ownerEmail ? "" : " (sandbox mode)"} berhasil dikirim ke ${phone} via session '${session}': "${message}"`,
                   },
                 ],
               },
@@ -307,14 +350,19 @@ export async function POST(request: Request) {
 
         case "pokobot_get_chats": {
           const limit = Math.min(Number(toolArgs.limit) || 5, 50);
+          const session = String(toolArgs.session || "default");
           const wahaUrl = (process.env.WAHA_BASE_URL || "").trim().replace(/\/+$/, "");
           let chats: any[] = [];
 
-          if (wahaUrl && !/^https?:\/\/(localhost|127\.0\.0\.1)/i.test(wahaUrl)) {
+          // Strictly require authenticated ownerEmail before reading real WhatsApp chats
+          if (ownerEmail && wahaUrl && !/^https?:\/\/(localhost|127\.0\.0\.1)/i.test(wahaUrl)) {
             try {
-              const headers: Record<string, string> = {};
+              const headers: Record<string, string> = {
+                "X-Owner-Email": ownerEmail,
+              };
               if (process.env.WAHA_API_KEY) headers["X-Api-Key"] = process.env.WAHA_API_KEY;
-              const res = await fetch(`${wahaUrl}/api/default/chats?limit=${limit}`, { headers });
+              const scoped = scopeSessionForTenant(ownerEmail, session);
+              const res = await fetch(`${wahaUrl}/api/${encodeURIComponent(scoped)}/chats?limit=${limit}`, { headers });
               if (res.ok) {
                 const raw = await res.json();
                 if (Array.isArray(raw)) chats = raw.slice(0, limit);
