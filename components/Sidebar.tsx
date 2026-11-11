@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { WahaQrConnector } from "@/components/WahaQrConnector";
+import { getSavedConnectedDevice } from "@/lib/wahaClient";
 import {
   LayoutDashboard,
   MessageSquare,
@@ -221,6 +223,17 @@ export const MENU_GROUPS: MenuGroup[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [connectedDevice, setConnectedDevice] = useState<{ phone: string; name: string; session: string } | null>(null);
+  const [showQrModal, setShowQrModal] = useState(false);
+
+  useEffect(() => {
+    const syncDevice = () => {
+      setConnectedDevice(getSavedConnectedDevice());
+    };
+    syncDevice();
+    window.addEventListener("pokobot-waha-updated", syncDevice);
+    return () => window.removeEventListener("pokobot-waha-updated", syncDevice);
+  }, []);
 
   return (
     <aside className="w-64 flex flex-col border-r border-poko-border bg-white justify-between select-none shrink-0 h-screen overflow-hidden">
@@ -293,36 +306,71 @@ export function Sidebar() {
       {/* Bottom Profile & Connection Status */}
       <div className="p-4 border-t border-poko-border bg-stone-50/50 shrink-0 space-y-3">
         {/* Connected Device Card */}
-        <div className="p-2.5 rounded-2xl bg-white border border-stone-200/80 shadow-xs">
-          <div className="flex items-center justify-between text-xs mb-1">
-            <span className="font-semibold text-stone-700 flex items-center gap-1.5 text-[11px]">
-              <Phone className="w-3 h-3 text-emerald-600" />
-              WhatsApp Terhubung
-            </span>
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-          </div>
-          <div className="text-xs font-mono text-stone-900 font-semibold truncate">
-            +62 896-3737-0000
-          </div>
-          <div className="text-[10px] text-stone-400">WAHA Multi-Device (Session 1)</div>
-        </div>
+        {connectedDevice ? (
+          <Link
+            href="/app/device"
+            className="block p-2.5 rounded-2xl bg-white border border-emerald-200/80 shadow-xs hover:border-emerald-300 transition-colors"
+          >
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="font-semibold text-stone-700 flex items-center gap-1.5 text-[11px]">
+                <Phone className="w-3 h-3 text-emerald-600" />
+                WhatsApp Terhubung
+              </span>
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+            </div>
+            <div className="text-xs font-mono text-stone-900 font-semibold truncate">
+              {connectedDevice.phone}
+            </div>
+            <div className="text-[10px] text-stone-400">WAHA Cloud ({connectedDevice.session})</div>
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowQrModal(true)}
+            className="w-full text-left block p-2.5 rounded-2xl bg-white border border-stone-200/80 shadow-xs hover:border-poko-charcoal/40 transition-colors"
+          >
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="font-semibold text-stone-700 flex items-center gap-1.5 text-[11px]">
+                <Phone className="w-3 h-3 text-stone-500" />
+                Device WhatsApp
+              </span>
+              <span className="flex h-2 w-2 relative">
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
+              </span>
+            </div>
+            <div className="text-xs font-mono text-stone-600 font-semibold truncate">
+              Belum Terhubung
+            </div>
+            <div className="text-[10px] text-emerald-700 font-semibold mt-0.5">
+              Klik untuk Scan QR Pop-up &rarr;
+            </div>
+          </button>
+        )}
 
         {/* User profile */}
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-poko-charcoal text-white flex items-center justify-center font-semibold text-xs">
-              IA
+              PB
             </div>
             <div>
-              <p className="text-xs font-semibold text-poko-charcoal leading-none">Ibob Atsuga</p>
-              <p className="text-[10px] text-stone-400 mt-1">Super Admin • Fluxy</p>
+              <p className="text-xs font-semibold text-poko-charcoal leading-none">Admin PokoBot</p>
+              <p className="text-[10px] text-stone-400 mt-1">Super Admin • Workspace</p>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Global QR Connect Pop-up Modal */}
+      <WahaQrConnector
+        mode="modal"
+        isOpen={showQrModal}
+        onClose={() => setShowQrModal(false)}
+        onConnected={() => setShowQrModal(false)}
+      />
     </aside>
   );
 }

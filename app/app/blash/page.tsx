@@ -16,12 +16,10 @@ import {
 } from "lucide-react";
 
 export default function BroadcastPage() {
-  const [campaignName, setCampaignName] = useState("Promo Spesial Member VIP November 2026");
+  const [campaignName, setCampaignName] = useState("");
   const [targetAudience, setTargetAudience] = useState("vip");
   const [delaySec, setDelaySec] = useState("8-15");
-  const [messageTemplate, setMessageTemplate] = useState(
-    "Halo {{nama}}! 👋\n\nTerima kasih telah setia berbisnis bersama kami. Khusus hari ini kami memberikan diskon 25% untuk perpanjangan langganan tahunan Poko Omnichannel CRM.\n\nKetik BALAS untuk klaim voucher promo Anda sekarang ya!"
-  );
+  const [messageTemplate, setMessageTemplate] = useState("");
 
   return (
     <PokoAppShell
@@ -43,6 +41,7 @@ export default function BroadcastPage() {
                   type="text"
                   value={campaignName}
                   onChange={(e) => setCampaignName(e.target.value)}
+                  placeholder="Contoh: Promo Spesial Pelanggan Baru"
                   className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
                 />
               </div>
@@ -57,9 +56,9 @@ export default function BroadcastPage() {
                     onChange={(e) => setTargetAudience(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
                   >
-                    <option value="vip">Pelanggan VIP (420 Kontak)</option>
-                    <option value="leads">Semua Leads Masuk (1.428 Kontak)</option>
-                    <option value="closed">Deal Won / Pelanggan Aktif (850 Kontak)</option>
+                    <option value="vip">Pelanggan VIP (0 Kontak)</option>
+                    <option value="leads">Semua Leads Masuk (0 Kontak)</option>
+                    <option value="closed">Deal Won / Pelanggan Aktif (0 Kontak)</option>
                     <option value="custom">Upload File Kontak CSV / Excel</option>
                   </select>
                 </div>
@@ -108,6 +107,7 @@ export default function BroadcastPage() {
                   rows={6}
                   value={messageTemplate}
                   onChange={(e) => setMessageTemplate(e.target.value)}
+                  placeholder="Halo {{nama}}! Tulis isi pesan broadcast Anda di sini..."
                   className="w-full p-4 rounded-2xl bg-stone-50 border border-stone-200 text-xs text-stone-800 font-sans leading-relaxed focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
                 />
               </div>
@@ -143,7 +143,9 @@ export default function BroadcastPage() {
             </span>
 
             <div className="p-4 rounded-2xl bg-white shadow-xs border border-stone-200/70 text-xs text-poko-charcoal leading-relaxed whitespace-pre-wrap">
-              {messageTemplate.replace(/\{\{nama\}\}/g, "Budi Santoso")}
+              {messageTemplate
+                ? messageTemplate.replace(/\{\{nama\}\}/g, "Nama Pelanggan")
+                : "Ketik template pesan di kolom kiri untuk melihat live preview WhatsApp..."}
               <div className="mt-2 text-right text-[10px] text-stone-400">13:45 ✓✓</div>
             </div>
           </div>

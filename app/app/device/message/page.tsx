@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { PokoAppShell } from "@/components/PokoAppShell";
+import { getSavedWahaConfig, buildWahaHeaders } from "@/lib/wahaClient";
 import {
   SendHorizontal,
   Smartphone,
@@ -21,32 +22,36 @@ export default function TestWhatsappMessagePage() {
 
   const handleTestSend = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!recipient.trim()) {
+      setStatus("error");
+      setResponseLog(JSON.stringify({ error: "Nomor WhatsApp tujuan wajib diisi." }, null, 2));
+      return;
+    }
+
     setStatus("sending");
     setResponseLog(null);
 
-    // Simulate WAHA API test call
-    setTimeout(() => {
-      setStatus("success");
-      setResponseLog(
-        JSON.stringify(
-          {
-            status: "success",
-            http_code: 201,
-            message: "Message dispatched via WAHA default session",
-            data: {
-              id: "true_" + recipient + "@c.us_3EB0C821" + Date.now(),
-              timestamp: Math.floor(Date.now() / 1000),
-              from: "default_session@c.us",
-              to: recipient + "@c.us",
-              body: message,
-              ack: 1,
-            },
-          },
-          null,
-          2
-        )
-      );
-    }, 700);
+    try {
+      const cfg = getSavedWahaConfig();
+      const res = await fetch("/api/sendText", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...buildWahaHeaders(cfg),
+        },
+        body: JSON.stringify({
+          chatId: recipient.trim(),
+          text: message,
+          session: cfg.session || "default",
+        }),
+      });
+      const data = await res.json();
+      setStatus(res.ok ? "success" : "error");
+      setResponseLog(JSON.stringify(data, null, 2));
+    } catch (err: any) {
+      setStatus("error");
+      setResponseLog(JSON.stringify({ error: err.message }, null, 2));
+    }
   };
 
   return (

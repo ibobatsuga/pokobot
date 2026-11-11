@@ -261,8 +261,8 @@ Garansi,Bagaimana kebijakan retur produk?,Retur dapat diajukan maksimal 2x24 jam
 ### 5.3 Format Import Kontak
 ```csv
 Nama,Nomor_WhatsApp,Email,Label,Kota,Catatan
-Budi Santoso,6281802731947,budi@gmail.com,Hot Lead;Reseller,Surabaya,Minat paket tahunan
-Siti Rahma,6281226300090,siti@yahoo.com,Langganan,Jakarta,Pernah beli 3x
+Budi Santoso,6281234567890,budi@example.com,Hot Lead;Reseller,Surabaya,Minat paket tahunan
+Siti Rahma,6289876543210,siti@example.com,Langganan,Jakarta,Pernah beli 3x
 ```
 
 ### 5.4 Sintaks Variabel Pesan & Spintax

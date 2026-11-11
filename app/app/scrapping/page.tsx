@@ -15,36 +15,16 @@ import {
 
 export default function ScraperPage() {
   const [scrapeType, setScrapeType] = useState<"group" | "gmaps">("group");
-  const [selectedGroup, setSelectedGroup] = useState("120363045678901234@g.us");
-  const [gmapsKeyword, setGmapsKeyword] = useState("Distributor Fashion Tanah Abang");
+  const [selectedGroup, setSelectedGroup] = useState("");
+  const [gmapsKeyword, setGmapsKeyword] = useState("");
   const [isScraping, setIsScraping] = useState(false);
 
-  const mockScrapedLeads = [
-    {
-      name: "Toko Grosir Berkah Jaya",
-      phone: "+62 812-4455-6677",
-      source: "Grup: Komunitas Reseller Jabodetabek",
-      status: "Valid WA",
-    },
-    {
-      name: "Sentra Konveksi Bandung",
-      phone: "+62 857-8899-0011",
-      source: "Grup: Komunitas Reseller Jabodetabek",
-      status: "Valid WA",
-    },
-    {
-      name: "Owner Butik Sabrina",
-      phone: "+62 813-2233-4455",
-      source: "Grup: Komunitas Reseller Jabodetabek",
-      status: "Valid WA",
-    },
-    {
-      name: "Mitra Logistik Cepat",
-      phone: "+62 819-7788-9900",
-      source: "Grup: Komunitas Reseller Jabodetabek",
-      status: "Valid WA",
-    },
-  ];
+  const scrapedLeads: {
+    name: string;
+    phone: string;
+    source: string;
+    status: string;
+  }[] = [];
 
   return (
     <PokoAppShell
@@ -92,15 +72,7 @@ export default function ScraperPage() {
                   onChange={(e) => setSelectedGroup(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
                 >
-                  <option value="120363045678901234@g.us">
-                    Komunitas Reseller Fashion Jabodetabek (256 Member)
-                  </option>
-                  <option value="120363098765432109@g.us">
-                    Asosiasi UMKM Digital Kuliner (180 Member)
-                  </option>
-                  <option value="120363011223344556@g.us">
-                    Grup Diskusi Developer & Tech Startups (512 Member)
-                  </option>
+                  <option value="">-- Hubungkan WhatsApp untuk memuat daftar grup --</option>
                 </select>
               </div>
 
@@ -124,6 +96,7 @@ export default function ScraperPage() {
                   type="text"
                   value={gmapsKeyword}
                   onChange={(e) => setGmapsKeyword(e.target.value)}
+                  placeholder="Contoh: Toko Kue Jakarta Selatan"
                   className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
                 />
               </div>
@@ -145,7 +118,7 @@ export default function ScraperPage() {
         <div className="bg-white rounded-3xl border border-poko-border shadow-subtle overflow-hidden">
           <div className="p-4 border-b border-poko-border flex items-center justify-between">
             <span className="text-xs font-bold text-poko-charcoal">
-              Hasil Scrape Terkini ({mockScrapedLeads.length} Kontak Ditemukan)
+              Hasil Scrape Terkini ({scrapedLeads.length} Kontak Ditemukan)
             </span>
 
             <div className="flex items-center gap-2">
@@ -160,31 +133,41 @@ export default function ScraperPage() {
             </div>
           </div>
 
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-stone-50/70 border-b border-poko-border text-[11px] font-bold text-stone-400 uppercase tracking-wider">
-                <th className="py-3 px-5">Nama Profil</th>
-                <th className="py-3 px-4">Nomor WhatsApp</th>
-                <th className="py-3 px-4">Sumber Ekstraksi</th>
-                <th className="py-3 px-4">Status WhatsApp</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100 text-xs text-stone-700">
-              {mockScrapedLeads.map((item, idx) => (
-                <tr key={idx} className="hover:bg-stone-50/50">
-                  <td className="py-3 px-5 font-semibold text-poko-charcoal">{item.name}</td>
-                  <td className="py-3 px-4 font-mono font-medium">{item.phone}</td>
-                  <td className="py-3 px-4 text-stone-500">{item.source}</td>
-                  <td className="py-3 px-4">
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1 w-fit">
-                      <CheckCircle2 className="w-3 h-3" />
-                      {item.status}
-                    </span>
-                  </td>
+          {scrapedLeads.length === 0 ? (
+            <div className="p-12 text-center space-y-2">
+              <Users className="w-8 h-8 text-stone-300 mx-auto" />
+              <p className="text-xs font-bold text-poko-charcoal">Belum Ada Hasil Ekstraksi</p>
+              <p className="text-[11px] text-stone-500 max-w-md mx-auto">
+                Hubungkan WhatsApp Anda via Cloud WAHA terlebih dahulu untuk menarik daftar anggota grup, atau masukkan kata kunci Google Maps di atas.
+              </p>
+            </div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-stone-50/70 border-b border-poko-border text-[11px] font-bold text-stone-400 uppercase tracking-wider">
+                  <th className="py-3 px-5">Nama Profil</th>
+                  <th className="py-3 px-4">Nomor WhatsApp</th>
+                  <th className="py-3 px-4">Sumber Ekstraksi</th>
+                  <th className="py-3 px-4">Status WhatsApp</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-stone-100 text-xs text-stone-700">
+                {scrapedLeads.map((item, idx) => (
+                  <tr key={idx} className="hover:bg-stone-50/50">
+                    <td className="py-3 px-5 font-semibold text-poko-charcoal">{item.name}</td>
+                    <td className="py-3 px-4 font-mono font-medium">{item.phone}</td>
+                    <td className="py-3 px-4 text-stone-500">{item.source}</td>
+                    <td className="py-3 px-4">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1 w-fit">
+                        <CheckCircle2 className="w-3 h-3" />
+                        {item.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </PokoAppShell>

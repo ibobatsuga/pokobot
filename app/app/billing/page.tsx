@@ -23,24 +23,14 @@ export default function BillingPage() {
     { amount: "1000000", label: "Rp 1.000.000", bonus: "8.000 Kuota AI + Bonus 20%" },
   ];
 
-  const invoices = [
-    {
-      id: "INV-2026-1108",
-      date: "8 Nov 2026",
-      desc: "Top Up Kredit Saldo AI & WAHA Gateway",
-      amount: "Rp 500.000",
-      method: "QRIS Instant (Duitku)",
-      status: "Lunas",
-    },
-    {
-      id: "INV-2026-1025",
-      date: "25 Okt 2026",
-      desc: "Paket Bulanan Poko CRM Pro Tier",
-      amount: "Rp 999.000",
-      method: "BCA Virtual Account",
-      status: "Lunas",
-    },
-  ];
+  const invoices: {
+    id: string;
+    date: string;
+    desc: string;
+    amount: string;
+    method: string;
+    status: string;
+  }[] = [];
 
   return (
     <PokoAppShell
@@ -52,18 +42,18 @@ export default function BillingPage() {
         <div className="p-7 rounded-3xl bg-poko-linen border border-stone-300/60 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider block mb-1">
-              Sisa Saldo Kredit Anda
+              Sisa Saldo & Kuota AI Starter
             </span>
-            <h2 className="text-3xl font-bold text-poko-charcoal">Rp 1.450.000</h2>
+            <h2 className="text-3xl font-bold text-poko-charcoal">10.000 Credits</h2>
             <p className="text-xs text-stone-600 mt-1">
-              Cukup untuk estimasi ~14.500 respons PokoBot AI
+              Saldo Kredit Starter (Rp 0 Top-up) — siap untuk pengujian & pesan awal
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <span className="px-3 py-1.5 rounded-full bg-white text-emerald-800 text-xs font-bold border border-emerald-200 flex items-center gap-1.5 shadow-xs">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              Langganan Aktif: Pro Tier
+              Paket Starter (Akun Baru)
             </span>
           </div>
         </div>
@@ -110,34 +100,44 @@ export default function BillingPage() {
             <span className="text-xs font-bold text-poko-charcoal">Riwayat Transaksi & Faktur</span>
           </div>
 
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-stone-50/70 border-b border-poko-border text-[11px] font-bold text-stone-400 uppercase tracking-wider">
-                <th className="py-3 px-5">No. Invoice</th>
-                <th className="py-3 px-4">Tanggal</th>
-                <th className="py-3 px-4">Deskripsi Pembelian</th>
-                <th className="py-3 px-4">Metode Bayar</th>
-                <th className="py-3 px-4">Nominal</th>
-                <th className="py-3 px-4">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100 text-xs text-stone-700">
-              {invoices.map((inv) => (
-                <tr key={inv.id} className="hover:bg-stone-50/50">
-                  <td className="py-3.5 px-5 font-mono font-bold text-poko-charcoal">{inv.id}</td>
-                  <td className="py-3.5 px-4 text-stone-500">{inv.date}</td>
-                  <td className="py-3.5 px-4 font-medium text-poko-charcoal">{inv.desc}</td>
-                  <td className="py-3.5 px-4 text-stone-600">{inv.method}</td>
-                  <td className="py-3.5 px-4 font-bold text-poko-charcoal">{inv.amount}</td>
-                  <td className="py-3.5 px-4">
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      {inv.status}
-                    </span>
-                  </td>
+          {invoices.length === 0 ? (
+            <div className="p-10 text-center space-y-2">
+              <Receipt className="w-8 h-8 text-stone-300 mx-auto" />
+              <p className="text-xs font-bold text-poko-charcoal">Belum Ada Riwayat Transaksi</p>
+              <p className="text-[11px] text-stone-500">
+                Saldo awal 10.000 Credits Starter Anda telah aktif. Faktur pembelian top up berikutnya akan tersimpan di sini.
+              </p>
+            </div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-stone-50/70 border-b border-poko-border text-[11px] font-bold text-stone-400 uppercase tracking-wider">
+                  <th className="py-3 px-5">No. Invoice</th>
+                  <th className="py-3 px-4">Tanggal</th>
+                  <th className="py-3 px-4">Deskripsi Pembelian</th>
+                  <th className="py-3 px-4">Metode Bayar</th>
+                  <th className="py-3 px-4">Nominal</th>
+                  <th className="py-3 px-4">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-stone-100 text-xs text-stone-700">
+                {invoices.map((inv) => (
+                  <tr key={inv.id} className="hover:bg-stone-50/50">
+                    <td className="py-3.5 px-5 font-mono font-bold text-poko-charcoal">{inv.id}</td>
+                    <td className="py-3.5 px-4 text-stone-500">{inv.date}</td>
+                    <td className="py-3.5 px-4 font-medium text-poko-charcoal">{inv.desc}</td>
+                    <td className="py-3.5 px-4 text-stone-600">{inv.method}</td>
+                    <td className="py-3.5 px-4 font-bold text-poko-charcoal">{inv.amount}</td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        {inv.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </PokoAppShell>

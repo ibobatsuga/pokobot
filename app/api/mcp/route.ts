@@ -307,32 +307,22 @@ export async function POST(request: Request) {
 
         case "pokobot_get_chats": {
           const limit = Math.min(Number(toolArgs.limit) || 5, 50);
-          const mockChats = [
-            {
-              id: "6281234567890@c.us",
-              name: "Pelanggan Baru (Lead 1)",
-              phone: "+62 812-3456-7890",
-              lastMessage: "Halo kak, ongkir ke Jakarta Selatan berapa?",
-              unreadCount: 1,
-              stage: "New Inquiries",
-            },
-            {
-              id: "6282198765432@c.us",
-              name: "Pelanggan Terverifikasi (Lead 2)",
-              phone: "+62 821-9876-5432",
-              lastMessage: "Saya mau transfer lewat QRIS BCA",
-              unreadCount: 0,
-              stage: "AI Qualifying",
-            },
-            {
-              id: "6285712345678@c.us",
-              name: "Pelanggan Bisnis (Lead 3)",
-              phone: "+62 857-1234-5678",
-              lastMessage: "Bisa minta tolong dihubungkan ke sales?",
-              unreadCount: 2,
-              stage: "Sales Follow-up",
-            },
-          ].slice(0, limit);
+          const wahaUrl = (process.env.WAHA_BASE_URL || "").trim().replace(/\/+$/, "");
+          let chats: any[] = [];
+
+          if (wahaUrl && !/^https?:\/\/(localhost|127\.0\.0\.1)/i.test(wahaUrl)) {
+            try {
+              const headers: Record<string, string> = {};
+              if (process.env.WAHA_API_KEY) headers["X-Api-Key"] = process.env.WAHA_API_KEY;
+              const res = await fetch(`${wahaUrl}/api/default/chats?limit=${limit}`, { headers });
+              if (res.ok) {
+                const raw = await res.json();
+                if (Array.isArray(raw)) chats = raw.slice(0, limit);
+              }
+            } catch {
+              chats = [];
+            }
+          }
 
           return NextResponse.json(
             {
@@ -342,7 +332,7 @@ export async function POST(request: Request) {
                 content: [
                   {
                     type: "text",
-                    text: JSON.stringify(mockChats, null, 2),
+                    text: JSON.stringify(chats, null, 2),
                   },
                 ],
               },
@@ -367,16 +357,7 @@ export async function POST(request: Request) {
             );
           }
 
-          const contacts = [
-            { name: "Pelanggan Baru (Lead 1)", phone: "+62 812-3456-7890", tag: "API Integration", city: "Jakarta Selatan" },
-            { name: "Pelanggan Terverifikasi (Lead 2)", phone: "+62 821-9876-5432", tag: "Paket Starter", city: "Bandung" },
-            { name: "Pelanggan Bisnis (Lead 3)", phone: "+62 857-1234-5678", tag: "Enterprise", city: "Surabaya" },
-          ].filter(
-            (c) =>
-              c.name.toLowerCase().includes(query) ||
-              c.phone.includes(query) ||
-              c.tag.toLowerCase().includes(query)
-          );
+          const contacts: any[] = [];
 
           return NextResponse.json(
             {

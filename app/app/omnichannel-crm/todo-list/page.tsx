@@ -28,56 +28,7 @@ interface TaskItem {
 }
 
 export default function TodoListPage() {
-  const [tasks, setTasks] = useState<TaskItem[]>([
-    {
-      id: "t1",
-      title: "Follow-up proposal Paket Enterprise via WhatsApp Call",
-      client: "Hendro Wijaya",
-      phone: "+62 812-2630-0090",
-      dueDate: "Hari Ini",
-      dueTime: "14:00",
-      priority: "Tinggi",
-      assignedTo: "Tim Sales",
-      completed: false,
-      notes: "Klien ingin konfirmasi apakah multi-device WAHA support 10 agent online serentak.",
-    },
-    {
-      id: "t2",
-      title: "Kirim demo link bot FAQ katalog skincare",
-      client: "Dewi Lestari",
-      phone: "+62 856-1234-5678",
-      dueDate: "Hari Ini",
-      dueTime: "16:30",
-      priority: "Sedang",
-      assignedTo: "PokoBot AI",
-      completed: false,
-      notes: "Contoh respon PokoBot AI dengan persona ramah & profesional.",
-    },
-    {
-      id: "t3",
-      title: "Verifikasi pembayaran transfer invoice Duitku",
-      client: "CV Berkah Abadi",
-      phone: "+62 819-3344-5566",
-      dueDate: "Kemarin",
-      dueTime: "10:00",
-      priority: "Tinggi",
-      assignedTo: "Finance Team",
-      completed: true,
-      notes: "Invoice #INV-2026-1109 lunas Rp 38.000.000.",
-    },
-    {
-      id: "t4",
-      title: "Kirim panduan instalasi Docker Colima ke tim IT klien",
-      client: "Budi Santoso",
-      phone: "+62 818-0273-1947",
-      dueDate: "Besok",
-      dueTime: "11:00",
-      priority: "Sedang",
-      assignedTo: "Tech Support",
-      completed: false,
-      notes: "Dokumentasi port 3000 dan webhook listener PHP.",
-    },
-  ]);
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
 
   const toggleTask = (id: string) => {
     setTasks((prev) =>
@@ -121,7 +72,18 @@ export default function TodoListPage() {
 
         {/* Task List */}
         <div className="bg-white rounded-3xl border border-poko-border shadow-subtle divide-y divide-stone-100 overflow-hidden">
-          {tasks.map((task) => (
+          {tasks.length === 0 ? (
+            <div className="p-12 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-stone-100 text-stone-400 flex items-center justify-center mx-auto">
+                <CheckSquare className="w-6 h-6" />
+              </div>
+              <h3 className="text-sm font-bold text-poko-charcoal">Belum Ada Agenda Follow-up</h3>
+              <p className="text-xs text-stone-500 max-w-md mx-auto">
+                Semua tugas follow-up pelanggan dan agenda tim sales akan tampil di sini.
+              </p>
+            </div>
+          ) : (
+            tasks.map((task) => (
             <div
               key={task.id}
               className={`p-5 flex items-start gap-4 transition-colors ${
@@ -180,7 +142,7 @@ export default function TodoListPage() {
                 </div>
               </div>
             </div>
-          ))}
+          )))}
         </div>
       </div>
     </PokoAppShell>

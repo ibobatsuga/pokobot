@@ -14,66 +14,20 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-export default function StoresContactsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+interface StoreContact {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  company: string;
+  tags: string[];
+  stage: string;
+  spent: string;
+  lastActive: string;
+}
 
-  const contacts = [
-    {
-      id: "c1",
-      name: "Hendro Wijaya",
-      phone: "+62 812-2630-0090",
-      email: "hendro@ptmajubersama.com",
-      company: "PT Maju Bersama",
-      tags: ["Enterprise", "VIP", "Whitelisted"],
-      stage: "AI Qualifying",
-      spent: "Rp 18.000.000",
-      lastActive: "10 min lalu",
-    },
-    {
-      id: "c2",
-      name: "Budi Santoso",
-      phone: "+62 818-0273-1947",
-      email: "budi.santoso@gmail.com",
-      company: "Freelance Developer",
-      tags: ["API Integration", "Whitelisted"],
-      stage: "New Inquiries",
-      spent: "Rp 7.500.000",
-      lastActive: "45 min lalu",
-    },
-    {
-      id: "c3",
-      name: "Akun Super Admin",
-      phone: "+62 812-9988-0000",
-      email: "admin@pokobot.id",
-      company: "Kantor Pusat",
-      tags: ["Internal", "Admin"],
-      stage: "Deal Won",
-      spent: "Rp 38.000.000",
-      lastActive: "Hari ini",
-    },
-    {
-      id: "c4",
-      name: "Dewi Lestari",
-      phone: "+62 856-1234-5678",
-      email: "dewi.lestari@skincareku.id",
-      company: "Aura Beauty Care",
-      tags: ["Reseller", "Katalog AI"],
-      stage: "AI Qualifying",
-      spent: "Rp 8.700.000",
-      lastActive: "Kemarin",
-    },
-    {
-      id: "c5",
-      name: "CV Berkah Abadi",
-      phone: "+62 819-3344-5566",
-      email: "procurement@berkahabadi.co.id",
-      company: "CV Berkah Abadi",
-      tags: ["Annual", "Wholesale"],
-      stage: "Deal Won",
-      spent: "Rp 42.000.000",
-      lastActive: "2 hari lalu",
-    },
-  ];
+export default function StoresContactsPage() {
+  const [contacts, setContacts] = useState<StoreContact[]>([]);
 
   return (
     <PokoAppShell
@@ -108,48 +62,60 @@ export default function StoresContactsPage() {
             </div>
           </div>
 
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-stone-50/70 border-b border-poko-border text-[11px] font-bold text-stone-400 uppercase tracking-wider">
-                <th className="py-3 px-5">Nama Kontak</th>
-                <th className="py-3 px-4">Nomor WhatsApp</th>
-                <th className="py-3 px-4">Tag Segmentasi</th>
-                <th className="py-3 px-4">Tahap Pipeline</th>
-                <th className="py-3 px-4">Total Transaksi</th>
-                <th className="py-3 px-4">Aktivitas Terakhir</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100 text-xs text-stone-700">
-              {contacts.map((c) => (
-                <tr key={c.id} className="hover:bg-stone-50/50 transition-colors">
-                  <td className="py-3.5 px-5">
-                    <div className="font-semibold text-poko-charcoal">{c.name}</div>
-                    <div className="text-[11px] text-stone-400">{c.email}</div>
-                  </td>
-                  <td className="py-3.5 px-4 font-mono font-medium">{c.phone}</td>
-                  <td className="py-3.5 px-4">
-                    <div className="flex items-center gap-1 flex-wrap">
-                      {c.tags.map((t, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-stone-100 text-stone-700 border border-stone-200"
-                        >
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-poko-linen text-stone-800 border border-stone-300/60">
-                      {c.stage}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 font-bold text-poko-charcoal">{c.spent}</td>
-                  <td className="py-3.5 px-4 text-stone-400">{c.lastActive}</td>
+          {contacts.length === 0 ? (
+            <div className="p-12 text-center space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-stone-100 text-stone-400 flex items-center justify-center mx-auto">
+                <Users className="w-7 h-7" />
+              </div>
+              <h3 className="text-sm font-bold text-poko-charcoal">Belum Ada Kontak Tersimpan</h3>
+              <p className="text-xs text-stone-500 max-w-md mx-auto">
+                Kontak pelanggan akan otomatis tersimpan saat ada pesan WhatsApp masuk dari WAHA, atau Anda dapat meng-import daftar kontak melalui file CSV.
+              </p>
+            </div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-stone-50/70 border-b border-poko-border text-[11px] font-bold text-stone-400 uppercase tracking-wider">
+                  <th className="py-3 px-5">Nama Kontak</th>
+                  <th className="py-3 px-4">Nomor WhatsApp</th>
+                  <th className="py-3 px-4">Tag Segmentasi</th>
+                  <th className="py-3 px-4">Tahap Pipeline</th>
+                  <th className="py-3 px-4">Total Transaksi</th>
+                  <th className="py-3 px-4">Aktivitas Terakhir</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-stone-100 text-xs text-stone-700">
+                {contacts.map((c) => (
+                  <tr key={c.id} className="hover:bg-stone-50/50 transition-colors">
+                    <td className="py-3.5 px-5">
+                      <div className="font-semibold text-poko-charcoal">{c.name}</div>
+                      <div className="text-[11px] text-stone-400">{c.email}</div>
+                    </td>
+                    <td className="py-3.5 px-4 font-mono font-medium">{c.phone}</td>
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-1 flex-wrap">
+                        {c.tags.map((t, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-stone-100 text-stone-700 border border-stone-200"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-poko-linen text-stone-800 border border-stone-300/60">
+                        {c.stage}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 font-bold text-poko-charcoal">{c.spent}</td>
+                    <td className="py-3.5 px-4 text-stone-400">{c.lastActive}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </PokoAppShell>

@@ -12,36 +12,16 @@ import {
 } from "lucide-react";
 
 export default function HumanAgentPage() {
-  const [agents, setAgents] = useState([
+  const [agents] = useState([
     {
       id: "u1",
-      name: "Super Admin",
-      email: "admin@pokobot.id",
+      name: "Admin PokoBot",
+      email: "owner@workspace.local",
       role: "Super Admin",
       status: "Online",
-      activeChats: 3,
-      maxChats: "Unlimited",
-      assignedTags: ["VIP", "Enterprise", "Procurement"],
-    },
-    {
-      id: "u2",
-      name: "Sarah Amanda",
-      email: "sarah.cs@fluxy.id",
-      role: "Senior CS Agent",
-      status: "Online",
-      activeChats: 7,
-      maxChats: "10 Chat",
-      assignedTags: ["Inquiry Umum", "Onboarding"],
-    },
-    {
-      id: "u3",
-      name: "Rizky Ramadhan",
-      email: "rizky.tech@fluxy.id",
-      role: "Technical Support",
-      status: "Offline",
       activeChats: 0,
-      maxChats: "5 Chat",
-      assignedTags: ["API Integration", "Docker Bug"],
+      maxChats: "Unlimited",
+      assignedTags: ["Semua Kanal", "Owner"],
     },
   ]);
 

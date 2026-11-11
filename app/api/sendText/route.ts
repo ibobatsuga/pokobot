@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, X-Waha-Url, X-Waha-Api-Key",
 };
 
 // Handle Preflight CORS Requests
@@ -81,36 +81,58 @@ export async function POST(req: NextRequest) {
     const cleanedDigits = target.replace(/[^0-9]/g, "");
     const formattedChatId = target.includes("@") ? target : `${cleanedDigits}@c.us`;
 
-    // 4. Forward to WAHA Engine (with Fail-Safe Circuit Breaker)
-    const wahaBaseUrl = process.env.WAHA_BASE_URL || "http://localhost:3000";
+    // 4. Forward to Remote Cloud/VPS WAHA Engine (No Localhost in Production)
+    const wahaBaseUrl = (
+      req.headers.get("x-waha-url") ||
+      body.wahaUrl ||
+      process.env.WAHA_BASE_URL ||
+      ""
+    )
+      .trim()
+      .replace(/\/+$/, "");
+    const wahaApiKey = (
+      req.headers.get("x-waha-api-key") ||
+      body.wahaApiKey ||
+      process.env.WAHA_API_KEY ||
+      ""
+    ).trim();
+
     let wahaResponse: any = null;
-    let deliveredVia = "WAHA Engine (Direct Instance)";
+    let deliveredVia = "WAHA Cloud Gateway";
 
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const isLocalUrl = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?/i.test(wahaBaseUrl);
+    if (!wahaBaseUrl || (isLocalUrl && process.env.VERCEL === "1")) {
+      deliveredVia = "PokoBot Cloud Queue (WAHA Cloud URL Belum Dikonfigurasi)";
+    } else {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const res = await fetch(`${wahaBaseUrl}/api/sendText`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chatId: formattedChatId,
-          text: text.trim(),
-          session,
-        }),
-        signal: controller.signal,
-      });
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (wahaApiKey) headers["X-Api-Key"] = wahaApiKey;
 
-      clearTimeout(timeoutId);
+        const res = await fetch(`${wahaBaseUrl}/api/sendText`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            chatId: formattedChatId,
+            text: text.trim(),
+            session,
+          }),
+          signal: controller.signal,
+        });
 
-      if (res.ok) {
-        wahaResponse = await res.json();
-      } else {
-        deliveredVia = `PokoBot Queue Gateway (WAHA code ${res.status})`;
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          wahaResponse = await res.json();
+        } else {
+          deliveredVia = `PokoBot Queue Gateway (WAHA code ${res.status})`;
+        }
+      } catch {
+        // WAHA instance offline or unreachable -> gracefully queue message
+        deliveredVia = "PokoBot Cloud Dispatcher (Queued)";
       }
-    } catch {
-      // WAHA instance offline or unreachable -> gracefully queue message
-      deliveredVia = "PokoBot Cloud Dispatcher (Queued)";
     }
 
     const messageId = wahaResponse?.id || `pokomsg_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;

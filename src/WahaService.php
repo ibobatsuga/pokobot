@@ -10,7 +10,7 @@ class WahaService
 
     public function __construct()
     {
-        $this->baseUrl = rtrim(env('WAHA_BASE_URL', 'http://localhost:3000'), '/');
+        $this->baseUrl = rtrim(env('WAHA_BASE_URL', ''), '/');
         $this->apiKey = env('WAHA_API_KEY', '');
         $this->defaultSession = env('WAHA_SESSION_NAME', 'default');
     }
@@ -20,6 +20,9 @@ class WahaService
      */
     public function isRunning(): bool
     {
+        if (empty($this->baseUrl)) {
+            return false;
+        }
         $res = $this->request('GET', '/api/sessions');
         return $res['status'] >= 200 && $res['status'] < 300;
     }

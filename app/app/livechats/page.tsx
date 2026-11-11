@@ -12,11 +12,11 @@ import {
 } from "lucide-react";
 
 export default function LiveChatWidgetPage() {
-  const [widgetTitle, setWidgetTitle] = useState("Chat dengan CS Poko");
+  const [widgetTitle, setWidgetTitle] = useState("Chat dengan Tim Kami");
   const [welcomeText, setWelcomeText] = useState(
-    "Halo! Ada yang bisa kami bantu seputar Poko Omnichannel & AI CRM?"
+    "Halo! Ada yang bisa kami bantu hari ini?"
   );
-  const [whatsappNumber, setWhatsappNumber] = useState("+6281234567890");
+  const [whatsappNumber, setWhatsappNumber] = useState("");
 
   const embedCode = `<script 
   src="https://ping-clone-poc.vercel.app/widget.js" 

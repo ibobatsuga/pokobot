@@ -12,120 +12,58 @@ import {
   User,
   Calendar,
   Sparkles,
+  Inbox,
 } from "lucide-react";
+
+interface DealItem {
+  id: string;
+  title: string;
+  client: string;
+  phone: string;
+  agent: string;
+  value: string;
+  date: string;
+  tag: string;
+  tagColor: string;
+}
 
 export default function PipelinePage() {
   const [selectedFilter, setSelectedFilter] = useState("all");
 
-  const stages = [
+  const stages: {
+    id: string;
+    name: string;
+    count: number;
+    total: string;
+    deals: DealItem[];
+  }[] = [
     {
       id: "stage-1",
       name: "New Inquiries",
-      count: 14,
-      total: "Rp 32.500.000",
-      deals: [
-        {
-          id: "d1",
-          title: "Setup WAHA Multi-Device Enterprise",
-          client: "PT Maju Bersama",
-          phone: "+62 812-2630-0090",
-          agent: "Account Manager",
-          value: "Rp 18.000.000",
-          date: "10 Nov 2026",
-          tag: "Hot Lead",
-          tagColor: "bg-red-50 text-red-700 border-red-200",
-        },
-        {
-          id: "d2",
-          title: "Integrasi CRM WhatsApp 5 CS",
-          client: "Budi Santoso",
-          phone: "+62 818-0273-1947",
-          agent: "Sarah (AI Agent)",
-          value: "Rp 7.500.000",
-          date: "10 Nov 2026",
-          tag: "Inquiry API",
-          tagColor: "bg-blue-50 text-blue-700 border-blue-200",
-        },
-        {
-          id: "d3",
-          title: "Paket Starter Toko Online",
-          client: "Siti Rahma",
-          phone: "+62 812-9988-7711",
-          agent: "Poko AI Bot",
-          value: "Rp 3.200.000",
-          date: "9 Nov 2026",
-          tag: "E-Commerce",
-          tagColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-        },
-      ],
+      count: 0,
+      total: "Rp 0",
+      deals: [],
     },
     {
       id: "stage-2",
       name: "AI Qualifying (Bot Poko)",
-      count: 9,
-      total: "Rp 46.800.000",
-      deals: [
-        {
-          id: "d4",
-          title: "Broadcast 50.000 Kontak Flash Sale",
-          client: "Dewi Lestari",
-          phone: "+62 856-1234-5678",
-          agent: "PokoBot AI",
-          value: "Rp 12.000.000",
-          date: "10 Nov 2026",
-          tag: "Broadcast",
-          tagColor: "bg-purple-50 text-purple-700 border-purple-200",
-        },
-        {
-          id: "d5",
-          title: "Custom LLM Knowledge Base Skincare",
-          client: "Klinik Cantik Ayu",
-          phone: "+62 878-1122-3344",
-          agent: "PokoBot AI",
-          value: "Rp 24.000.000",
-          date: "8 Nov 2026",
-          tag: "AI Fine-tune",
-          tagColor: "bg-amber-50 text-amber-700 border-amber-200",
-        },
-      ],
+      count: 0,
+      total: "Rp 0",
+      deals: [],
     },
     {
       id: "stage-3",
       name: "Sales Follow-up (Human CS)",
-      count: 6,
-      total: "Rp 54.000.000",
-      deals: [
-        {
-          id: "d6",
-          title: "Annual Subscription 10 Numbers",
-          client: "Kurniawan Pratama",
-          phone: "+62 813-7722-1100",
-          agent: "Account Manager",
-          value: "Rp 36.000.000",
-          date: "7 Nov 2026",
-          tag: "Enterprise",
-          tagColor: "bg-rose-50 text-rose-700 border-rose-200",
-        },
-      ],
+      count: 0,
+      total: "Rp 0",
+      deals: [],
     },
     {
       id: "stage-4",
       name: "Deal Closed / Won",
-      count: 22,
-      total: "Rp 164.200.000",
-      deals: [
-        {
-          id: "d7",
-          title: "Wholesale CRM License 2026",
-          client: "CV Berkah Abadi",
-          phone: "+62 819-3344-5566",
-          agent: "Account Manager",
-          value: "Rp 38.000.000",
-          date: "Kemarin",
-          tag: "Paid Duitku",
-          tagColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-        },
-      ],
+      count: 0,
+      total: "Rp 0",
+      deals: [],
     },
   ];
 
@@ -163,7 +101,7 @@ export default function PipelinePage() {
           </div>
 
           <div className="text-xs text-stone-500 font-medium">
-            Total Pipeline Revenue: <span className="font-bold text-poko-charcoal">Rp 297.500.000</span>
+            Total Pipeline Revenue: <span className="font-bold text-poko-charcoal">Rp 0</span>
           </div>
         </div>
 
@@ -172,7 +110,7 @@ export default function PipelinePage() {
           {stages.map((stage) => (
             <div
               key={stage.id}
-              className="rounded-3xl bg-stone-50/70 border border-poko-border p-4 flex flex-col space-y-4 min-h-[500px]"
+              className="rounded-3xl bg-stone-50/70 border border-poko-border p-4 flex flex-col space-y-4 min-h-[420px]"
             >
               {/* Header */}
               <div className="flex items-center justify-between pb-3 border-b border-stone-200">
@@ -186,35 +124,44 @@ export default function PipelinePage() {
               </div>
 
               {/* Deals Cards */}
-              <div className="space-y-3">
-                {stage.deals.map((deal) => (
-                  <div
-                    key={deal.id}
-                    className="p-4 rounded-2xl bg-white border border-stone-200 shadow-subtle space-y-2.5 transition-all hover:border-stone-400 hover:-translate-y-0.5 cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between">
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${deal.tagColor}`}>
-                        {deal.tag}
-                      </span>
-                      <span className="text-[10px] text-stone-400">{deal.date}</span>
-                    </div>
+              {stage.deals.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center p-6 border-2 border-dashed border-stone-200/80 rounded-2xl text-center space-y-2">
+                  <Inbox className="w-6 h-6 text-stone-300" />
+                  <p className="text-[11px] font-medium text-stone-400">
+                    Belum ada deal di tahapan ini
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {stage.deals.map((deal) => (
+                    <div
+                      key={deal.id}
+                      className="p-4 rounded-2xl bg-white border border-stone-200 shadow-subtle space-y-2.5 transition-all hover:border-stone-400 hover:-translate-y-0.5 cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between">
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${deal.tagColor}`}>
+                          {deal.tag}
+                        </span>
+                        <span className="text-[10px] text-stone-400">{deal.date}</span>
+                      </div>
 
-                    <div>
-                      <h4 className="text-xs font-bold text-poko-charcoal">{deal.title}</h4>
-                      <p className="text-[11px] text-stone-500 mt-0.5 font-medium">{deal.client}</p>
-                      <p className="text-[10px] text-stone-400 font-mono">{deal.phone}</p>
-                    </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-poko-charcoal">{deal.title}</h4>
+                        <p className="text-[11px] text-stone-500 mt-0.5 font-medium">{deal.client}</p>
+                        <p className="text-[10px] text-stone-400 font-mono">{deal.phone}</p>
+                      </div>
 
-                    <div className="pt-2 border-t border-stone-100 flex items-center justify-between">
-                      <span className="text-xs font-bold text-poko-charcoal">{deal.value}</span>
-                      <span className="text-[10px] text-stone-500 flex items-center gap-1">
-                        <User className="w-2.5 h-2.5" />
-                        {deal.agent}
-                      </span>
+                      <div className="pt-2 border-t border-stone-100 flex items-center justify-between">
+                        <span className="text-xs font-bold text-poko-charcoal">{deal.value}</span>
+                        <span className="text-[10px] text-stone-500 flex items-center gap-1">
+                          <User className="w-2.5 h-2.5" />
+                          {deal.agent}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

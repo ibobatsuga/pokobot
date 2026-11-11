@@ -55,8 +55,8 @@ class ChatbotEngine
         }
 
         // Dapatkan identitas diri bot/pemilik sesi dari metadata WAHA
-        $myId = $payload['me']['id'] ?? '';       // contoh: 6289637370000@c.us
-        $myLid = $payload['me']['lid'] ?? '';     // contoh: 185705812779188@lid
+        $myId = $payload['me']['id'] ?? '';       // contoh: 628xxxxxxxxxx@c.us
+        $myLid = $payload['me']['lid'] ?? '';     // contoh: id_device@lid
         $myNumber = preg_replace('/[^0-9]/', '', $myId);
 
         // Ekstrak remoteJid dan alternatif nomor telepon jika WhatsApp menggunakan LID

@@ -1,275 +1,219 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { PokoAppShell } from "@/components/PokoAppShell";
+import { WahaQrConnector } from "@/components/WahaQrConnector";
 import {
   Smartphone,
   Plus,
   RefreshCw,
   QrCode,
-  ShieldCheck,
+  ExternalLink,
+  Cloud,
   CheckCircle2,
   Trash2,
-  BatteryCharging,
-  Wifi,
-  ExternalLink,
-  X,
-  Check,
 } from "lucide-react";
+import {
+  getSavedWahaConfig,
+  buildWahaHeaders,
+  formatWhatsAppNumber,
+  saveConnectedDevice,
+} from "@/lib/wahaClient";
+
+interface DeviceSession {
+  id: string;
+  phone: string;
+  label: string;
+  status: string;
+  engine: string;
+  connectedAt: string;
+  webhookUrl: string;
+}
 
 export default function WhatsappDevicePage() {
   const [showQrModal, setShowQrModal] = useState(false);
-  const [sessions, setSessions] = useState([
-    {
-      id: "default",
-      phone: "+62 812-3456-7890",
-      label: "WhatsApp Bisnis Utama",
-      status: "WORKING",
-      engine: "WAHA (devlikeapro/waha:latest)",
-      battery: "94% (Charging)",
-      connectedAt: "Hari ini, 09:30 WIB",
-      webhookUrl: "https://ping-clone-poc.vercel.app/api/webhook",
-    },
-  ]);
+  const [sessions, setSessions] = useState<DeviceSession[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
+  const [wahaConfigured, setWahaConfigured] = useState(false);
 
-  const [newDevicePhone, setNewDevicePhone] = useState("");
-  const [newDeviceLabel, setNewDeviceLabel] = useState("");
+  const loadSessions = useCallback(async () => {
+    setLoadingSessions(true);
+    try {
+      const cfg = getSavedWahaConfig();
+      const res = await fetch("/api/waha?action=sessions", {
+        headers: buildWahaHeaders(cfg),
+        cache: "no-store",
+      });
+      const data = await res.json();
 
-  const handleDisconnect = (id: string) => {
-    setSessions(sessions.filter((s) => s.id !== id));
-  };
+      setWahaConfigured(Boolean(data.configured));
 
-  const handleConnectSimulated = () => {
-    const newSession = {
-      id: `session_${Date.now()}`,
-      phone: newDevicePhone || "+62 821-9876-5432",
-      label: newDeviceLabel || "WhatsApp CS Baru",
-      status: "WORKING",
-      engine: "WAHA (devlikeapro/waha:latest)",
-      battery: "98%",
-      connectedAt: "Baru saja",
-      webhookUrl: "https://ping-clone-poc.vercel.app/api/webhook",
-    };
-    setSessions([...sessions, newSession]);
-    setShowQrModal(false);
-    setNewDevicePhone("");
-    setNewDeviceLabel("");
+      if (Array.isArray(data.sessions)) {
+        const origin = typeof window !== "undefined" ? window.location.origin : "https://ping-clone-poc.vercel.app";
+        const mapped: DeviceSession[] = data.sessions
+          .filter((s: any) => s.status === "WORKING" || s.me?.id)
+          .map((s: any) => ({
+            id: s.name || "default",
+            phone: formatWhatsAppNumber(s.me?.id) || "Menunggu Pairing",
+            label: s.me?.pushName || `WhatsApp (${s.name || "default"})`,
+            status: s.status || "WORKING",
+            engine: "WAHA Cloud Gateway",
+            connectedAt: "Live Sync",
+            webhookUrl: `${origin}/api/webhook`,
+          }));
+
+        setSessions(mapped);
+
+        if (mapped.length > 0 && mapped[0].status === "WORKING") {
+          saveConnectedDevice({
+            phone: mapped[0].phone,
+            name: mapped[0].label,
+            session: mapped[0].id,
+          });
+        } else {
+          saveConnectedDevice(null);
+        }
+      }
+    } catch {
+      // keep empty state cleanly
+    } finally {
+      setLoadingSessions(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSessions();
+    const handler = () => loadSessions();
+    window.addEventListener("pokobot-waha-updated", handler);
+    return () => window.removeEventListener("pokobot-waha-updated", handler);
+  }, [loadSessions]);
+
+  const handleDisconnect = async (sessionId: string) => {
+    const cfg = getSavedWahaConfig();
+    await fetch("/api/waha", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...buildWahaHeaders(cfg),
+      },
+      body: JSON.stringify({ action: "logout", session: sessionId }),
+    }).catch(() => {});
+    saveConnectedDevice(null);
+    await loadSessions();
   };
 
   return (
     <PokoAppShell
       title="Whatsapp Device Manager"
-      subtitle="Hubungkan nomor WhatsApp baru dengan scan QR Code menggunakan engine WAHA"
+      subtitle="Hubungkan nomor WhatsApp Anda melalui server Cloud/VPS WAHA dengan QR Code langsung di aplikasi maupun pop-up"
       actionButton={
-        <button
-          onClick={() => setShowQrModal(true)}
-          className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all shadow-xs"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>Tambah Device Baru</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={loadSessions}
+            className="h-9 flex items-center gap-1.5 px-3 rounded-xl border border-poko-border bg-white text-xs font-semibold text-stone-700 hover:bg-stone-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loadingSessions ? "animate-spin" : ""}`} />
+            <span>Sync Status</span>
+          </button>
+          <button
+            onClick={() => setShowQrModal(true)}
+            className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all shadow-xs"
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span>Pop-up Scan QR</span>
+          </button>
+        </div>
       }
     >
       <div className="space-y-6 max-w-5xl">
-        {/* Onboarding Banner when no device connected */}
-        {sessions.length === 0 && (
-          <div className="p-8 rounded-3xl bg-white border border-stone-200 text-center space-y-4 shadow-subtle">
-            <div className="w-16 h-16 rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200">
-              <QrCode className="w-8 h-8" />
-            </div>
-            <h3 className="font-bold text-base text-poko-charcoal">
-              Belum Ada Perangkat WhatsApp yang Terhubung
-            </h3>
-            <p className="text-xs text-stone-500 max-w-md mx-auto">
-              Scan QR Code untuk menautkan nomor WhatsApp Anda ke PokoBot agar AI Bot dan CRM dapat langsung mulai membalas pesan.
-            </p>
-            <button
-              onClick={() => setShowQrModal(true)}
-              className="h-9 px-4 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-all inline-flex items-center gap-2"
-            >
-              <QrCode className="w-4 h-4" />
-              <span>Scan QR Code Sekarang</span>
-            </button>
-          </div>
-        )}
-
-        {/* Device Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {sessions.map((device) => (
-            <div
-              key={device.id}
-              className="p-6 rounded-3xl bg-white border border-poko-border shadow-subtle space-y-4"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200">
-                    <Smartphone className="w-6 h-6" />
+        {/* Connected Device Cards Grid (if any active WORKING sessions) */}
+        {sessions.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {sessions.map((device) => (
+              <div
+                key={device.id}
+                className="p-6 rounded-3xl bg-white border border-poko-border shadow-subtle space-y-4"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200">
+                      <Smartphone className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-sm text-poko-charcoal">{device.label}</h3>
+                      <p className="text-xs font-mono text-stone-500 font-semibold">{device.phone}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-sm text-poko-charcoal">{device.label}</h3>
-                    <p className="text-xs font-mono text-stone-500 font-semibold">{device.phone}</p>
-                  </div>
-                </div>
 
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  {device.status}
-                </span>
-              </div>
-
-              {/* Specs */}
-              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/70 text-xs space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-stone-400">Session ID:</span>
-                  <span className="font-mono font-semibold text-stone-800">{device.id}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-stone-400">Engine Gateway:</span>
-                  <span className="font-medium text-stone-800">{device.engine}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-stone-400">Baterai Ponsel:</span>
-                  <span className="font-medium text-emerald-600 flex items-center gap-1">
-                    <BatteryCharging className="w-3.5 h-3.5" />
-                    {device.battery}
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    {device.status}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-stone-400">Tersambung Sejak:</span>
-                  <span className="text-stone-600">{device.connectedAt}</span>
+
+                {/* Specs */}
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/70 text-xs space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-stone-400">Session ID:</span>
+                    <span className="font-mono font-semibold text-stone-800">{device.id}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-stone-400">Engine Gateway:</span>
+                    <span className="font-medium text-stone-800 flex items-center gap-1">
+                      <Cloud className="w-3.5 h-3.5 text-blue-600" />
+                      {device.engine}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-stone-400">Webhook Auto-Sync:</span>
+                    <span className="font-mono text-[11px] text-emerald-700 truncate max-w-[200px]">
+                      {device.webhookUrl}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Action buttons */}
-              <div className="pt-2 flex items-center justify-between">
-                <a
-                  href="/docs"
-                  className="flex items-center gap-1.5 text-xs text-stone-600 hover:text-poko-charcoal font-medium"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  Dokumentasi API
-                </a>
+                {/* Action buttons */}
+                <div className="pt-2 flex items-center justify-between">
+                  <a
+                    href="/docs"
+                    className="flex items-center gap-1.5 text-xs text-stone-600 hover:text-poko-charcoal font-medium"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Dokumentasi API
+                  </a>
 
-                <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleDisconnect(device.id)}
-                    className="px-3 py-1.5 rounded-xl border border-rose-200 text-rose-600 text-xs font-semibold hover:bg-rose-50 transition-colors"
+                    className="px-3 py-1.5 rounded-xl border border-rose-200 text-rose-600 text-xs font-semibold hover:bg-rose-50 transition-colors flex items-center gap-1.5"
                   >
-                    Disconnect
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Putuskan Koneksi</span>
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* QR CODE SCANNER MODAL */}
-        {showQrModal && (
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-5 animate-in fade-in zoom-in-95">
-              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-                <div className="flex items-center gap-2">
-                  <QrCode className="w-5 h-5 text-emerald-600" />
-                  <h3 className="font-bold text-base text-poko-charcoal">Tautkan WhatsApp Baru</h3>
-                </div>
-                <button
-                  onClick={() => setShowQrModal(false)}
-                  className="p-1 rounded-lg hover:bg-stone-100 text-stone-400 hover:text-stone-700"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* QR Code Card */}
-              <div className="p-6 bg-stone-50 rounded-2xl border border-stone-200/80 flex flex-col items-center text-center space-y-3">
-                <div className="w-48 h-48 bg-white p-3 rounded-2xl border border-stone-200 flex items-center justify-center shadow-xs">
-                  {/* SVG QR Code Simulation */}
-                  <svg className="w-full h-full text-stone-900" viewBox="0 0 100 100" fill="currentColor">
-                    <rect x="10" y="10" width="25" height="25" rx="4" />
-                    <rect x="65" y="10" width="25" height="25" rx="4" />
-                    <rect x="10" y="65" width="25" height="25" rx="4" />
-                    <rect x="15" y="15" width="15" height="15" fill="white" />
-                    <rect x="70" y="15" width="15" height="15" fill="white" />
-                    <rect x="15" y="70" width="15" height="15" fill="white" />
-                    <rect x="19" y="19" width="7" height="7" fill="black" />
-                    <rect x="74" y="19" width="7" height="7" fill="black" />
-                    <rect x="19" y="74" width="7" height="7" fill="black" />
-                    <rect x="42" y="12" width="6" height="6" />
-                    <rect x="52" y="12" width="6" height="6" />
-                    <rect x="42" y="24" width="6" height="12" />
-                    <rect x="52" y="30" width="6" height="6" />
-                    <rect x="12" y="45" width="8" height="6" />
-                    <rect x="25" y="45" width="12" height="6" />
-                    <rect x="42" y="45" width="16" height="10" />
-                    <rect x="65" y="45" width="10" height="6" />
-                    <rect x="80" y="45" width="8" height="6" />
-                    <rect x="42" y="65" width="8" height="15" />
-                    <rect x="55" y="65" width="12" height="6" />
-                    <rect x="75" y="65" width="12" height="15" />
-                    <rect x="55" y="78" width="8" height="12" />
-                  </svg>
-                </div>
-                <span className="text-[11px] text-stone-500 font-medium">
-                  QR Code otomatis diperbarui setiap 20 detik
-                </span>
-              </div>
-
-              {/* Instructions */}
-              <div className="space-y-1.5 text-xs text-stone-600 bg-stone-50 p-4 rounded-xl border border-stone-200/60">
-                <p className="font-bold text-stone-800 mb-1">Cara Menghubungkan:</p>
-                <p>1. Buka aplikasi WhatsApp di HP Anda.</p>
-                <p>2. Ketuk <strong>Menu (titik tiga)</strong> atau <strong>Pengaturan</strong>.</p>
-                <p>3. Pilih <strong>Perangkat Tertaut</strong> lalu ketuk <strong>Tautkan Perangkat</strong>.</p>
-                <p>4. Arahkan kamera HP Anda ke kode QR di atas.</p>
-              </div>
-
-              {/* Form Input for Custom Name/Phone */}
-              <div className="space-y-3 pt-1">
-                <div>
-                  <label className="block text-[11px] font-bold text-stone-700 mb-1">
-                    Label Nama Perangkat (Opsional)
-                  </label>
-                  <input
-                    type="text"
-                    value={newDeviceLabel}
-                    onChange={(e) => setNewDeviceLabel(e.target.value)}
-                    placeholder="Contoh: WhatsApp CS 2"
-                    className="w-full px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-stone-700 mb-1">
-                    Nomor WhatsApp (Opsional)
-                  </label>
-                  <input
-                    type="text"
-                    value={newDevicePhone}
-                    onChange={(e) => setNewDevicePhone(e.target.value)}
-                    placeholder="Contoh: +62 821-9876-5432"
-                    className="w-full px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
-                  />
-                </div>
-              </div>
-
-              {/* Button */}
-              <div className="pt-2 flex items-center justify-end gap-2">
-                <button
-                  onClick={() => setShowQrModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-stone-600 hover:bg-stone-100"
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={handleConnectSimulated}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors flex items-center gap-1.5 shadow-xs"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Simulasi Tautkan Perangkat</span>
-                </button>
-              </div>
-            </div>
+            ))}
           </div>
         )}
+
+        {/* IN-APP INLINE LIVE WAHA QR CONNECTOR (Always accessible directly on page!) */}
+        <WahaQrConnector
+          mode="inline"
+          onOpenPopup={() => setShowQrModal(true)}
+          onConnected={() => {
+            loadSessions();
+          }}
+        />
+
+        {/* POP-UP QR MODAL */}
+        <WahaQrConnector
+          mode="modal"
+          isOpen={showQrModal}
+          onClose={() => setShowQrModal(false)}
+          onConnected={() => {
+            setShowQrModal(false);
+            loadSessions();
+          }}
+        />
       </div>
     </PokoAppShell>
   );

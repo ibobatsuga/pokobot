@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { PokoAppShell } from "@/components/PokoAppShell";
+import { WahaQrConnector } from "@/components/WahaQrConnector";
+import { getSavedConnectedDevice } from "@/lib/wahaClient";
 import {
   TrendingUp,
   Bot,
@@ -27,49 +29,60 @@ import {
   Check,
   ChevronRight,
   Filter,
+  QrCode,
+  Inbox,
 } from "lucide-react";
 
 export default function PokoDashboardPage() {
   const [autoReplyEnabled, setAutoReplyEnabled] = useState(true);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [connectedDevice, setConnectedDevice] = useState<{ phone: string; name: string; session: string } | null>(null);
 
-  // Ping KPI Stats Cards
+  useEffect(() => {
+    const sync = () => setConnectedDevice(getSavedConnectedDevice());
+    sync();
+    window.addEventListener("pokobot-waha-updated", sync);
+    return () => window.removeEventListener("pokobot-waha-updated", sync);
+  }, []);
+
+  // Ping KPI Stats Cards (Clean Slate for New User)
   const kpiStats = [
     {
       title: "Device WhatsApp",
-      value: "2 / 2",
+      value: connectedDevice ? "1 / 1" : "0 / 1",
       unit: "Terkoneksi",
-      change: "100% Online",
-      changeType: "positive",
+      change: connectedDevice ? connectedDevice.phone : "Siap Scan QR",
+      changeType: connectedDevice ? "positive" : "neutral",
       icon: Smartphone,
       iconBg: "bg-emerald-50 text-emerald-600 border-emerald-200",
       href: "/app/device",
     },
     {
       title: "Database Kontak",
-      value: "3.480",
+      value: "0",
       unit: "Kontak",
-      change: "+128 minggu ini",
-      changeType: "positive",
+      change: "Siap Terima Kontak",
+      changeType: "neutral",
       icon: Users,
       iconBg: "bg-blue-50 text-blue-600 border-blue-200",
       href: "/app/stores",
     },
     {
       title: "Broadcast Terkirim",
-      value: "14.250",
+      value: "0",
       unit: "Pesan",
-      change: "99.4% Anti-Ban",
-      changeType: "positive",
+      change: "Anti-Ban Ready",
+      changeType: "neutral",
       icon: Send,
       iconBg: "bg-purple-50 text-purple-600 border-purple-200",
       href: "/app/blash",
     },
     {
       title: "Sisa Kuota AI",
-      value: "85.740",
+      value: "10.000",
       unit: "Credits",
-      change: "Paket Business Pro",
-      changeType: "neutral",
+      change: "Saldo Starter Baru",
+      changeType: "positive",
       icon: Zap,
       iconBg: "bg-amber-50 text-amber-600 border-amber-200",
       href: "/app/billing",
@@ -111,201 +124,66 @@ export default function PokoDashboardPage() {
     },
   ];
 
-  // Connected Devices (Ping Device Health)
-  const connectedDevices = [
-    {
-      id: "dev-1",
-      name: "CS & Billing Official",
-      phone: "+62 812-3456-7890",
-      status: "Connected",
-      battery: "94%",
-      autoReply: true,
-      lastSync: "Baru saja",
-    },
-    {
-      id: "dev-2",
-      name: "Sales & Inbound Marketing",
-      phone: "+62 821-9876-5432",
-      status: "Connected",
-      battery: "88%",
-      autoReply: true,
-      lastSync: "1 min lalu",
-    },
-  ];
+  // Connected Devices (Clean State - 0 Connected)
+  const connectedDevices: Array<{
+    id: string;
+    name: string;
+    phone: string;
+    status: string;
+    battery: string;
+    autoReply: boolean;
+    lastSync: string;
+  }> = [];
 
-  // Recent Broadcasts (Ping Campaign Reports)
-  const recentBroadcasts = [
-    {
-      id: "b-1",
-      name: "Promo Gajian Flash Sale 50%",
-      target: "1.200 Kontak",
-      success: 1194,
-      failed: 6,
-      rate: "99.5%",
-      date: "Hari ini, 10:15 WIB",
-      status: "Selesai",
-    },
-    {
-      id: "b-2",
-      name: "Nudge Keranjang Belanja Belum Checkout",
-      target: "450 Kontak",
-      success: 450,
-      failed: 0,
-      rate: "100%",
-      date: "Kemarin, 16:30 WIB",
-      status: "Selesai",
-    },
-    {
-      id: "b-3",
-      name: "Edukasi Tips Perawatan & Katalog Baru",
-      target: "850 Kontak",
-      success: 842,
-      failed: 8,
-      rate: "99.1%",
-      date: "08 Nov 2026",
-      status: "Selesai",
-    },
-  ];
+  // Recent Broadcasts (Clean State - 0 Broadcasts)
+  const recentBroadcasts: Array<{
+    id: string;
+    name: string;
+    target: string;
+    success: number;
+    failed: number;
+    rate: string;
+    date: string;
+    status: string;
+  }> = [];
 
-  // Live Inbound Activity Feed
-  const recentMessages = [
-    {
-      id: "m-1",
-      sender: "Budi Santoso",
-      phone: "+62 812-3456-7890",
-      snippet: "Halo kak, ongkir ke Jagakarsa Jakarta Selatan berapa ya untuk paket 1kg?",
-      intent: "Cek Ongkir Otomatis",
-      status: "Dibalas AI (1.1s)",
-      statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      time: "2 min lalu",
-    },
-    {
-      id: "m-2",
-      sender: "Siti Rahma",
-      phone: "+62 812-9988-7711",
-      snippet: "Saya mau transfer lewat QRIS BCA bisa dikirim kodenya?",
-      intent: "Kirim QRIS Pembayaran",
-      status: "Dibalas AI (0.9s)",
-      statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      time: "8 min lalu",
-    },
-    {
-      id: "m-3",
-      sender: "Hendro Wijaya",
-      phone: "+62 857-1234-5678",
-      snippet: "Bisa minta tolong dihubungkan ke tim sales langsung untuk negosiasi kontrak?",
-      intent: "Eskalasi CS Manusia",
-      status: "Takeover CS Agent",
-      statusColor: "bg-blue-50 text-blue-700 border-blue-200",
-      time: "15 min lalu",
-    },
-    {
-      id: "m-4",
-      sender: "Dewi Lestari",
-      phone: "+62 856-1234-5678",
-      snippet: "Katalog skincare brightening yang cocok buat kulit sensitif ada kak?",
-      intent: "Kirim Katalog PDF",
-      status: "Dibalas AI (1.4s)",
-      statusColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      time: "24 min lalu",
-    },
-  ];
+  // Live Inbound Activity Feed (Clean State - 0 Inbound Messages)
+  const recentMessages: Array<{
+    id: string;
+    sender: string;
+    phone: string;
+    snippet: string;
+    intent: string;
+    status: string;
+    statusColor: string;
+    time: string;
+  }> = [];
 
-  // CRM Pipeline Stages
+  // CRM Pipeline Stages (Clean Slate)
   const pipelineStages = [
     {
       title: "New Inquiries",
-      count: 12,
-      total: "Rp 28.5M",
-      cards: [
-        {
-          id: "1",
-          name: "Budi Santoso",
-          phone: "+62 812-3456-7890",
-          tag: "API Integration",
-          tagColor: "bg-blue-50 text-blue-700 border-blue-200",
-          value: "Rp 7.500.000",
-          time: "10 min lalu",
-          summary: "Menanyakan integrasi WAHA & CRM untuk 5 CS agent.",
-          dark: false,
-        },
-        {
-          id: "2",
-          name: "Siti Rahma",
-          phone: "+62 812-9988-7711",
-          tag: "Paket Starter",
-          tagColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-          value: "Rp 3.200.000",
-          time: "32 min lalu",
-          summary: "Tanya promo onboarding bulanan bot toko online.",
-          dark: false,
-        },
-      ],
+      count: 0,
+      total: "Rp 0",
+      cards: [] as any[],
     },
     {
       title: "AI Qualifying",
-      count: 8,
-      total: "Rp 34.2M",
-      cards: [
-        {
-          id: "3",
-          name: "Hendro Wijaya",
-          phone: "+62 857-1234-5678",
-          tag: "Enterprise Tier",
-          tagColor: "bg-purple-50 text-purple-700 border-purple-200",
-          value: "Rp 18.000.000",
-          time: "1 jam lalu",
-          summary: "Bot Poko sedang kualifikasi kebutuhan 10.000 broadcast/hari.",
-          dark: true, // Dark card highlight Ronas IT style
-        },
-        {
-          id: "4",
-          name: "Dewi Lestari",
-          phone: "+62 856-1234-5678",
-          tag: "Custom Bot",
-          tagColor: "bg-amber-50 text-amber-700 border-amber-200",
-          value: "Rp 8.700.000",
-          time: "2 jam lalu",
-          summary: "Menyediakan FAQ katalog produk skincare via PokoBot AI.",
-          dark: false,
-        },
-      ],
+      count: 0,
+      total: "Rp 0",
+      cards: [] as any[],
     },
     {
       title: "Sales Follow-up",
-      count: 5,
-      total: "Rp 42.0M",
-      cards: [
-        {
-          id: "5",
-          name: "Kurniawan Pratama",
-          phone: "+62 813-7722-1100",
-          tag: "Human Review",
-          tagColor: "bg-rose-50 text-rose-700 border-rose-200",
-          value: "Rp 24.000.000",
-          time: "3 jam lalu",
-          summary: "Request demo live via Google Meet dari tim procurement.",
-          dark: false,
-        },
-      ],
+      count: 0,
+      total: "Rp 0",
+      cards: [] as any[],
     },
     {
       title: "Deal Closed / Won",
-      count: 19,
-      total: "Rp 142.8M",
-      cards: [
-        {
-          id: "6",
-          name: "CV Berkah Abadi",
-          phone: "+62 819-3344-5566",
-          tag: "Annual Contract",
-          tagColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-          value: "Rp 38.000.000",
-          time: "Kemarin",
-          summary: "Invoice lunas via Payment Gateway.",
-          dark: false,
-        },
-      ],
+      count: 0,
+      total: "Rp 0",
+      cards: [] as any[],
     },
   ];
 
@@ -314,17 +192,18 @@ export default function PokoDashboardPage() {
       title="Dashboard Stats"
       subtitle="Ringkasan performa bisnis, integrasi WhatsApp, status perangkat, dan pipeline CRM"
       actionButton={
-        <Link
-          href="/app/blash"
-          className="h-9 px-3.5 rounded-xl text-xs font-semibold bg-poko-charcoal text-white hover:bg-black transition-all shadow-xs flex items-center gap-1.5"
+        <button
+          type="button"
+          onClick={() => setShowQrModal(true)}
+          className="h-9 px-3.5 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-xs flex items-center gap-1.5"
         >
-          <Plus className="w-3.5 h-3.5" />
-          <span>Buat Broadcast</span>
-        </Link>
+          <QrCode className="w-3.5 h-3.5" />
+          <span>{connectedDevice ? "Kelola / Scan QR" : "Hubungkan WhatsApp"}</span>
+        </button>
       }
     >
       <div className="space-y-8 pb-12">
-        {/* 1. QUICK ACTIONS BAR (Ping Quick Action Suite) */}
+        {/* 1. QUICK ACTIONS BAR */}
         <div className="bg-white rounded-2xl border border-poko-border p-3 shadow-subtle flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 pl-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -358,7 +237,7 @@ export default function PokoDashboardPage() {
           </div>
         </div>
 
-        {/* 2. PING KPI STATS SUMMARY CARDS (4 Cards Row) */}
+        {/* 2. PING KPI STATS SUMMARY CARDS (4 Cards Row - Clean Slate) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {kpiStats.map((stat, i) => {
             const Icon = stat.icon;
@@ -401,7 +280,7 @@ export default function PokoDashboardPage() {
           })}
         </div>
 
-        {/* 3. HERO KPI & AI ACTIVITY SECTION (Ronas IT Warm Minimalist Card) */}
+        {/* 3. HERO KPI & AI ACTIVITY SECTION */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left 2 Cols: Linen Card with Radial Gauge & Charts */}
           <div className="lg:col-span-2 rounded-3xl bg-poko-linen border border-stone-200/60 p-7 flex flex-col justify-between shadow-subtle relative overflow-hidden">
@@ -412,10 +291,10 @@ export default function PokoDashboardPage() {
                   Total Pesan Diproses
                 </div>
                 <h2 className="text-3xl font-bold tracking-tight text-poko-charcoal">
-                  18.420 Pesan
+                  0 Pesan
                 </h2>
                 <p className="text-xs text-stone-600 mt-1">
-                  1.428 kontak aktif • 1.2 detik rata-rata kecepatan respon AI
+                  0 kontak aktif • Siap memproses pesan WhatsApp baru secara otomatis
                 </p>
               </div>
 
@@ -438,25 +317,24 @@ export default function PokoDashboardPage() {
                       cy="50"
                       r="40"
                       fill="transparent"
-                      stroke="#1f1f1f"
+                      stroke="#10b981"
                       strokeWidth="10"
                       strokeDasharray="251.2"
-                      strokeDashoffset="142.8"
+                      strokeDashoffset="125.6"
                       strokeLinecap="round"
-                      className="transition-all duration-1000 ease-out"
                     />
                   </svg>
                   <div className="absolute bottom-1 text-center">
-                    <span className="text-2xl font-bold text-poko-charcoal">86%</span>
+                    <span className="text-xl font-bold text-emerald-700">100%</span>
                   </div>
                 </div>
                 <span className="text-[11px] font-medium text-stone-500 mt-1">
-                  Otomasi AI Berhasil
+                  Sistem AI Siap Digunakan
                 </span>
               </div>
             </div>
 
-            {/* Striped / Solid Activity Bars (Ronas IT Design Signature) */}
+            {/* Striped / Solid Activity Bars (Clean Slate Baseline) */}
             <div className="mt-8 pt-6 border-t border-stone-300/40 relative z-10">
               <div className="flex items-center justify-between text-xs text-stone-600 mb-3">
                 <span className="font-semibold text-poko-charcoal">
@@ -472,29 +350,22 @@ export default function PokoDashboardPage() {
                 </div>
               </div>
 
-              {/* Bars */}
+              {/* Baseline 0 Bars */}
               <div className="grid grid-cols-7 gap-3 items-end h-24">
                 {[
-                  { day: "Sen", ai: 65, human: 20 },
-                  { day: "Sel", ai: 85, human: 15 },
-                  { day: "Rab", ai: 92, human: 25 },
-                  { day: "Kam", ai: 78, human: 30 },
-                  { day: "Jum", ai: 110, human: 40 },
-                  { day: "Sab", ai: 50, human: 10 },
-                  { day: "Min", ai: 45, human: 5 },
+                  { day: "Sen", ai: 0, human: 0 },
+                  { day: "Sel", ai: 0, human: 0 },
+                  { day: "Rab", ai: 0, human: 0 },
+                  { day: "Kam", ai: 0, human: 0 },
+                  { day: "Jum", ai: 0, human: 0 },
+                  { day: "Sab", ai: 0, human: 0 },
+                  { day: "Min", ai: 0, human: 0 },
                 ].map((bar, i) => (
                   <div key={i} className="flex flex-col items-center gap-1.5 h-full justify-end">
                     <div className="w-full flex items-end justify-center gap-1">
-                      <div
-                        style={{ height: `${(bar.ai / 120) * 80}px` }}
-                        className="w-4 rounded-t-md bg-poko-charcoal transition-all hover:opacity-80"
-                      ></div>
-                      <div
-                        style={{ height: `${(bar.human / 120) * 80}px` }}
-                        className="w-4 rounded-t-md bg-stone-300 transition-all hover:opacity-80"
-                      ></div>
+                      <div className="w-4 h-1.5 rounded-t-sm bg-stone-300"></div>
                     </div>
-                    <span className="text-[10px] text-stone-500 font-medium">{bar.day}</span>
+                    <span className="text-[10px] text-stone-400 font-medium">{bar.day}</span>
                   </div>
                 ))}
               </div>
@@ -511,7 +382,7 @@ export default function PokoDashboardPage() {
                   className="w-10 h-10 rounded-full object-contain border border-stone-200 shadow-xs"
                 />
                 <span className="text-[11px] font-mono px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
-                  Engine Aktif
+                  Engine Siap
                 </span>
               </div>
 
@@ -540,33 +411,34 @@ export default function PokoDashboardPage() {
                 <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-xs text-stone-600 space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-stone-400">Target WhatsApp:</span>
-                    <span className="font-semibold text-stone-800">WhatsApp Gateway Aktif</span>
+                    <span className="font-semibold text-stone-800">Menunggu Tautan Device</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-stone-400">Response Speed:</span>
-                    <span className="font-semibold text-emerald-600">1.2 detik (Streaming)</span>
+                    <span className="font-semibold text-emerald-600">1.2 detik (Streaming Siap)</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-stone-400">Whitelist Safety:</span>
-                    <span className="font-semibold text-stone-800">Proteksi Anti-Loop Aktif</span>
+                    <span className="font-semibold text-stone-800">Mode Terbuka (Siap Pakai)</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="pt-4 border-t border-poko-border">
-              <Link
-                href="/app/omnichannel-crm"
+              <button
+                type="button"
+                onClick={() => setShowQrModal(true)}
                 className="w-full py-2.5 px-4 rounded-xl bg-poko-linen text-poko-charcoal font-semibold text-xs flex items-center justify-center gap-2 hover:bg-stone-200 transition-all border border-stone-300/60"
               >
-                <MessageSquare className="w-4 h-4 text-emerald-600" />
-                Buka CRM Chat App
-              </Link>
+                <QrCode className="w-4 h-4 text-emerald-600" />
+                <span>{connectedDevice ? `Terhubung: ${connectedDevice.phone}` : "Hubungkan WhatsApp Device (QR Pop-up)"}</span>
+              </button>
             </div>
           </div>
         </div>
 
-        {/* 4. DUAL MIDDLE SECTION: DEVICE HEALTH & RECENT BROADCASTS vs LIVE INBOUND FEED */}
+        {/* 4. DUAL MIDDLE SECTION: CLEAN DEVICE MONITOR & BROADCASTS vs LIVE FEED */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column: Device Monitor + Recent Broadcasts */}
           <div className="space-y-6">
@@ -578,8 +450,14 @@ export default function PokoDashboardPage() {
                   <h3 className="font-bold text-sm text-poko-charcoal">
                     Perangkat WhatsApp Terhubung
                   </h3>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    2 Online
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                      connectedDevice
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-stone-100 text-stone-600 border-stone-200"
+                    }`}
+                  >
+                    {connectedDevice ? "1 Online" : "0 Online"}
                   </span>
                 </div>
                 <Link
@@ -591,37 +469,50 @@ export default function PokoDashboardPage() {
                 </Link>
               </div>
 
-              <div className="space-y-3">
-                {connectedDevices.map((dev) => (
-                  <div
-                    key={dev.id}
-                    className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/70 flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-emerald-600">
-                        <Smartphone className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-bold text-xs text-poko-charcoal">{dev.name}</p>
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        </div>
-                        <p className="text-[11px] text-stone-500 font-mono mt-0.5">{dev.phone}</p>
-                      </div>
+              {connectedDevice ? (
+                <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white border border-emerald-200 text-emerald-600 flex items-center justify-center">
+                      <Smartphone className="w-5 h-5" />
                     </div>
-
-                    <div className="flex items-center gap-4 text-xs">
-                      <div className="flex items-center gap-1 text-stone-500">
-                        <BatteryCharging className="w-3.5 h-3.5 text-emerald-600" />
-                        <span className="text-[11px] font-medium">{dev.battery}</span>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-100/70 text-emerald-800">
-                        Auto-Reply
-                      </span>
+                    <div>
+                      <p className="font-bold text-xs text-poko-charcoal">{connectedDevice.name}</p>
+                      <p className="text-xs font-mono text-emerald-700 font-semibold">{connectedDevice.phone}</p>
                     </div>
                   </div>
-                ))}
-              </div>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                    WORKING
+                  </span>
+                </div>
+              ) : (
+                <div className="p-6 rounded-2xl bg-stone-50 border border-stone-200/70 text-center space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-white border border-stone-200 text-emerald-600 flex items-center justify-center mx-auto">
+                    <QrCode className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-xs text-poko-charcoal">Belum Ada WhatsApp Terhubung</p>
+                    <p className="text-[11px] text-stone-500 mt-0.5">
+                      Scan QR Code WAHA Cloud untuk menautkan nomor WhatsApp bisnis Anda.
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowQrModal(true)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-colors"
+                    >
+                      <QrCode className="w-3.5 h-3.5" />
+                      <span>Pop-up Scan QR</span>
+                    </button>
+                    <Link
+                      href="/app/device"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-stone-200 text-stone-700 text-xs font-semibold hover:bg-stone-100 transition-colors"
+                    >
+                      <span>Buka Halaman Device</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Recent Broadcasts Widget */}
@@ -642,36 +533,15 @@ export default function PokoDashboardPage() {
                 </Link>
               </div>
 
-              <div className="space-y-3">
-                {recentBroadcasts.map((b) => (
-                  <div
-                    key={b.id}
-                    className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/70 space-y-2"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="font-bold text-xs text-poko-charcoal">{b.name}</h4>
-                        <p className="text-[11px] text-stone-500 mt-0.5">
-                          {b.target} • {b.date}
-                        </p>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        {b.rate} Sukses
-                      </span>
-                    </div>
-
-                    {/* Mini Progress Bar */}
-                    <div className="w-full bg-stone-200 h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-emerald-600 h-full rounded-full w-[99.5%]"></div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px] text-stone-500 pt-0.5">
-                      <span>Terkirim: {b.success.toLocaleString()} pesan</span>
-                      <span>Gagal: {b.failed}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {recentBroadcasts.length === 0 ? (
+                <div className="p-6 rounded-2xl bg-stone-50 border border-stone-200/70 text-center space-y-2">
+                  <Send className="w-6 h-6 text-stone-400 mx-auto" />
+                  <p className="font-bold text-xs text-poko-charcoal">Belum Ada Kampanye Broadcast</p>
+                  <p className="text-[11px] text-stone-500">
+                    Kirim pesan massal promosi atau pengumuman dengan jeda anti-ban otomatis.
+                  </p>
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -695,38 +565,19 @@ export default function PokoDashboardPage() {
                 </Link>
               </div>
 
-              <div className="space-y-3">
-                {recentMessages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/70 space-y-2 hover:bg-stone-100/80 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-xs text-poko-charcoal">{msg.sender}</span>
-                        <span className="text-[10px] text-stone-400 font-mono">{msg.phone}</span>
-                      </div>
-                      <span className="text-[10px] text-stone-400">{msg.time}</span>
-                    </div>
-
-                    <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed bg-white p-2.5 rounded-xl border border-stone-200/50">
-                      &ldquo;{msg.snippet}&rdquo;
-                    </p>
-
-                    <div className="flex items-center justify-between pt-1 text-[11px]">
-                      <div className="flex items-center gap-1.5">
-                        <Sparkles className="w-3 h-3 text-purple-600" />
-                        <span className="font-medium text-stone-600">Intent: {msg.intent}</span>
-                      </div>
-                      <span
-                        className={`px-2 py-0.5 rounded-md font-semibold text-[10px] border ${msg.statusColor}`}
-                      >
-                        {msg.status}
-                      </span>
-                    </div>
+              {recentMessages.length === 0 ? (
+                <div className="p-8 rounded-2xl bg-stone-50 border border-stone-200/70 text-center space-y-3 my-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white border border-stone-200 flex items-center justify-center text-stone-400 mx-auto">
+                    <Inbox className="w-6 h-6" />
                   </div>
-                ))}
-              </div>
+                  <div>
+                    <h4 className="font-bold text-xs text-poko-charcoal">Menunggu Pesan Masuk</h4>
+                    <p className="text-[11px] text-stone-500 mt-1 max-w-xs mx-auto leading-relaxed">
+                      Pesan WhatsApp dari pelanggan baru akan muncul secara real-time di sini lengkap dengan deteksi intent AI.
+                    </p>
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <div className="pt-4 mt-4 border-t border-stone-100">
@@ -734,14 +585,14 @@ export default function PokoDashboardPage() {
                 href="/app/omnichannel-crm"
                 className="w-full py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
               >
-                <span>Lihat Semua Percakapan di CRM</span>
+                <span>Buka CRM Chat App</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>
         </div>
 
-        {/* 5. KANBAN CRM PIPELINE PREVIEW (Preserved from Current Dashboard) */}
+        {/* 5. KANBAN CRM PIPELINE PREVIEW (Clean Slate - 0 Deals) */}
         <div>
           <div className="flex items-center justify-between mb-5">
             <div>
@@ -762,12 +613,12 @@ export default function PokoDashboardPage() {
             </div>
           </div>
 
-          {/* Kanban Columns Grid */}
+          {/* Kanban Columns Grid (Clean State) */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {pipelineStages.map((stage, idx) => (
               <div
                 key={idx}
-                className="rounded-3xl bg-white border border-poko-border p-4 flex flex-col shadow-subtle min-h-[440px]"
+                className="rounded-3xl bg-white border border-poko-border p-4 flex flex-col shadow-subtle min-h-[320px]"
               >
                 {/* Column Header */}
                 <div className="flex items-center justify-between pb-3 border-b border-poko-border mb-4">
@@ -777,71 +628,34 @@ export default function PokoDashboardPage() {
                       {stage.title}
                     </h4>
                     <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-stone-100 text-stone-600">
-                      {stage.count}
+                      0
                     </span>
                   </div>
-                  <span className="text-[11px] font-bold text-stone-400">{stage.total}</span>
+                  <span className="text-[11px] font-bold text-stone-400">Rp 0</span>
                 </div>
 
-                {/* Cards inside Column */}
-                <div className="space-y-3 flex-1 overflow-y-auto pr-0.5">
-                  {stage.cards.map((card) =>
-                    card.dark ? (
-                      <div
-                        key={card.id}
-                        className="rounded-2xl bg-poko-charcoal text-white p-4 shadow-card space-y-3 border border-stone-800 transition-all hover:-translate-y-0.5"
-                      >
-                        <div className="flex items-start justify-between">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/10 text-white border border-white/20">
-                            {card.tag}
-                          </span>
-                          <span className="text-[10px] text-stone-400">{card.time}</span>
-                        </div>
-                        <div>
-                          <p className="font-bold text-sm text-white">{card.name}</p>
-                          <p className="text-[11px] text-stone-400 font-mono mt-0.5">
-                            {card.phone}
-                          </p>
-                        </div>
-                        <p className="text-xs text-stone-300 leading-relaxed">{card.summary}</p>
-                        <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
-                          <span className="text-[11px] text-stone-400">Estimasi Nilai</span>
-                          <span className="font-bold text-emerald-400">{card.value}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        key={card.id}
-                        className="rounded-2xl bg-white p-4 shadow-subtle border border-stone-200/70 space-y-3 transition-all hover:border-stone-400 hover:-translate-y-0.5"
-                      >
-                        <div className="flex items-start justify-between">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${card.tagColor}`}
-                          >
-                            {card.tag}
-                          </span>
-                          <span className="text-[10px] text-stone-400">{card.time}</span>
-                        </div>
-                        <div>
-                          <p className="font-bold text-sm text-poko-charcoal">{card.name}</p>
-                          <p className="text-[11px] text-stone-500 font-mono mt-0.5">
-                            {card.phone}
-                          </p>
-                        </div>
-                        <p className="text-xs text-stone-600 leading-relaxed">{card.summary}</p>
-                        <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-xs">
-                          <span className="text-[11px] text-stone-400">Estimasi Nilai</span>
-                          <span className="font-bold text-poko-charcoal">{card.value}</span>
-                        </div>
-                      </div>
-                    )
-                  )}
+                {/* Empty State Card */}
+                <div className="flex-1 flex flex-col items-center justify-center p-6 border-2 border-dashed border-stone-200/80 rounded-2xl text-center space-y-2">
+                  <span className="text-stone-300">
+                    <Inbox className="w-6 h-6 mx-auto" />
+                  </span>
+                  <p className="text-[11px] font-medium text-stone-400">
+                    Belum ada deal di tahapan ini
+                  </p>
                 </div>
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* WAHA QR Pop-up Modal */}
+      <WahaQrConnector
+        mode="modal"
+        isOpen={showQrModal}
+        onClose={() => setShowQrModal(false)}
+        onConnected={() => setShowQrModal(false)}
+      />
     </PokoAppShell>
   );
 }

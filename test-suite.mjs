@@ -115,7 +115,7 @@ async function runTests() {
     });
     const callData2 = await call2.json();
     assert(call2.status === 200, "Tool call 'pokobot_get_chats' returns 200");
-    assert(callData2.result.content[0].text.includes("Lead 1"), "Chats list contains customer profile");
+    assert(Array.isArray(JSON.parse(callData2.result.content[0].text)), "Chats list returns clean JSON array");
 
     // 3g. MCP Negative Test: Missing Required Parameters
     const callBadArgs = await fetch(`${BASE_URL}/api/mcp`, {
@@ -312,6 +312,33 @@ async function runTests() {
     assert(all200, `All 25 concurrent requests succeeded with HTTP 200 in ${duration}ms`);
   } catch (err) {
     assert(false, "Stress test network error", err.message);
+  }
+
+  // --- 7. CLOUD WAHA GATEWAY & ANTI-LOCALHOST SUITE ---
+  console.log(`\n[TEST GROUP 7] Cloud WAHA Gateway & QR Proxy Suite`);
+  try {
+    const wahaOpt = await fetch(`${BASE_URL}/api/waha`, { method: "OPTIONS" });
+    assert(wahaOpt.status === 204, "OPTIONS /api/waha returns 204 Preflight");
+
+    const wahaUnconf = await fetch(`${BASE_URL}/api/waha?action=sessions`);
+    const wahaUnconfData = await wahaUnconf.json();
+    assert(wahaUnconf.status === 200, "GET /api/waha?action=sessions returns HTTP 200");
+    assert(Array.isArray(wahaUnconfData.sessions), "WAHA proxy returns clean sessions array");
+
+    const wahaLocalBlock = await fetch(`${BASE_URL}/api/waha?action=qr&wahaUrl=http://localhost:3000`);
+    const wahaLocalData = await wahaLocalBlock.json();
+    assert(wahaLocalData.configured === false, "Anti-Localhost Guard blocks http://localhost:3000 in cloud");
+    assert(wahaLocalData.code === "WAHA_LOCALHOST_BLOCKED", "Diagnostic code confirms WAHA_LOCALHOST_BLOCKED");
+
+    const wahaPostBlock = await fetch(`${BASE_URL}/api/waha`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "test", wahaUrl: "http://127.0.0.1:3000" }),
+    });
+    const wahaPostData = await wahaPostBlock.json();
+    assert(wahaPostData.ok === false && wahaPostData.code === "WAHA_LOCALHOST_BLOCKED", "POST /api/waha blocks 127.0.0.1 cleanly");
+  } catch (err) {
+    assert(false, "Cloud WAHA Suite network error", err.message);
   }
 
   // --- FINAL SCOREBOARD ---
