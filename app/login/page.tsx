@@ -10,7 +10,6 @@ import {
   EyeOff,
   ArrowRight,
   AlertCircle,
-  CheckCircle2,
   ShieldCheck,
   Bot,
   Smartphone,
@@ -344,11 +343,6 @@ function LoginFormContent() {
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
-
-            <div className="pt-2 flex items-center gap-2 text-[11px] text-stone-500">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span>Workspace bersih, siap menghubungkan WhatsApp &amp; AI training Anda.</span>
-            </div>
           </div>
         </div>
       </div>
