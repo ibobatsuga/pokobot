@@ -7,8 +7,11 @@ import { WahaQrConnector } from "@/components/WahaQrConnector";
 import { AuthUser } from "@/lib/session";
 import {
   getSavedConnectedDevices,
+  saveConnectedDevices,
   getActiveSessionName,
   setActiveSessionName,
+  setActiveTenantEmail,
+  formatWhatsAppNumber,
   ConnectedDeviceItem,
 } from "@/lib/wahaClient";
 import {
@@ -257,12 +260,41 @@ export function Sidebar({
     fetch("/api/auth/me", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
-        if (data?.user) setAuthUser(data.user);
+        if (data?.user) {
+          setAuthUser(data.user);
+          setActiveTenantEmail(data.user.email || null);
+          setDevices(getSavedConnectedDevices());
+          setActiveSession(getActiveSessionName());
+          fetch("/api/waha?action=sessions", { cache: "no-store" })
+            .then((r) => r.json())
+            .then((wahaData) => {
+              if (Array.isArray(wahaData?.sessions)) {
+                const mapped: ConnectedDeviceItem[] = wahaData.sessions
+                  .filter((s: any) => s.status === "WORKING" || s.me?.id)
+                  .map((s: any) => ({
+                    sessionName: s.name || "default",
+                    label: s.label || s.name || "WhatsApp",
+                    phone: formatWhatsAppNumber(s.me?.id) || "Terhubung",
+                    pushName: s.me?.pushName || undefined,
+                    status: s.status || "WORKING",
+                  }));
+                saveConnectedDevices(mapped);
+                setDevices(mapped);
+                setActiveSession(getActiveSessionName());
+              }
+            })
+            .catch(() => {});
+        } else {
+          setActiveTenantEmail(null);
+          setDevices([]);
+          setActiveSession("");
+        }
       })
       .catch(() => {});
   }, []);
 
   const handleLogout = async () => {
+    setActiveTenantEmail(null);
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
     router.replace("/login");
     router.refresh();

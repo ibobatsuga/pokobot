@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import QRCode from "qrcode";
+import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/session";
+import {
+  getTenantPrefix,
+  scopeSessionForTenant,
+  unscopeSessionForTenant,
+} from "@/lib/tenant";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -46,13 +52,20 @@ function resolveWahaConfig(req: NextRequest, body?: any) {
   };
 }
 
-function buildWahaHeaders(apiKey: string, extra: Record<string, string> = {}) {
+function buildWahaHeaders(
+  apiKey: string,
+  extra: Record<string, string> = {},
+  ownerEmail?: string
+) {
   const headers: Record<string, string> = {
     Accept: "application/json, image/png, */*",
     ...extra,
   };
   if (apiKey) {
     headers["X-Api-Key"] = apiKey;
+  }
+  if (ownerEmail) {
+    headers["X-Owner-Email"] = ownerEmail.toLowerCase();
   }
   return headers;
 }
@@ -90,12 +103,29 @@ export async function GET(req: NextRequest) {
   }
 
   const { wahaUrl, apiKey } = config;
-  const headers = buildWahaHeaders(apiKey);
+  const user = await verifySessionToken(req.cookies.get(SESSION_COOKIE_NAME)?.value);
 
   try {
-    // 1. LIST ALL SESSIONS (Multi-WhatsApp)
+    // 1. LIST SESSIONS FOR CURRENT AUTHENTICATED USER ONLY
     if (action === "sessions") {
-      const res = await fetchWithTimeout(`${wahaUrl}/api/sessions?all=true`, { headers });
+      if (!user?.email) {
+        return NextResponse.json(
+          {
+            configured: true,
+            connected: true,
+            sessions: [],
+          },
+          { headers: CORS_HEADERS }
+        );
+      }
+
+      const ownerEmail = user.email.toLowerCase();
+      const prefix = getTenantPrefix(ownerEmail);
+      const headers = buildWahaHeaders(apiKey, {}, ownerEmail);
+      const res = await fetchWithTimeout(
+        `${wahaUrl}/api/sessions?all=true&owner=${encodeURIComponent(ownerEmail)}`,
+        { headers }
+      );
       if (!res.ok) {
         const errText = await res.text();
         return NextResponse.json(
@@ -110,7 +140,18 @@ export async function GET(req: NextRequest) {
       }
 
       const data = await res.json();
-      const sessions = Array.isArray(data) ? data : [];
+      const rawList = Array.isArray(data) ? data : [];
+      const sessions = rawList
+        .filter((s: any) => {
+          const itemOwner = String(s?.owner || "").toLowerCase();
+          const itemName = String(s?.name || "");
+          return itemOwner === ownerEmail || itemName.startsWith(prefix);
+        })
+        .map((s: any) => ({
+          ...s,
+          name: unscopeSessionForTenant(ownerEmail, String(s.name || "")),
+        }));
+
       return NextResponse.json(
         {
           configured: true,
@@ -121,13 +162,29 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // 2. FETCH LIVE QR CODE FOR SPECIFIC SESSION + LABEL
+    // 2. FETCH LIVE QR CODE FOR SPECIFIC SESSION + LABEL (Tenant-isolated)
     if (action === "qr") {
+      if (!user?.email) {
+        return NextResponse.json(
+          {
+            configured: true,
+            connected: false,
+            error: "Silakan login terlebih dahulu untuk menghubungkan WhatsApp.",
+          },
+          { status: 401, headers: CORS_HEADERS }
+        );
+      }
+
+      const ownerEmail = user.email.toLowerCase();
+      const scopedSession = scopeSessionForTenant(ownerEmail, session);
+      const cleanSessionName = unscopeSessionForTenant(ownerEmail, scopedSession);
+      const headers = buildWahaHeaders(apiKey, {}, ownerEmail);
+
       let sessionStatus = "STOPPED";
       let sessionInfo: any = null;
 
       const infoRes = await fetchWithTimeout(
-        `${wahaUrl}/api/sessions/${encodeURIComponent(session)}`,
+        `${wahaUrl}/api/sessions/${encodeURIComponent(scopedSession)}?owner=${encodeURIComponent(ownerEmail)}`,
         { headers }
       );
 
@@ -138,10 +195,11 @@ export async function GET(req: NextRequest) {
         const origin = req.nextUrl.origin;
         const createRes = await fetchWithTimeout(`${wahaUrl}/api/sessions`, {
           method: "POST",
-          headers: buildWahaHeaders(apiKey, { "Content-Type": "application/json" }),
+          headers: buildWahaHeaders(apiKey, { "Content-Type": "application/json" }, ownerEmail),
           body: JSON.stringify({
-            name: session,
+            name: scopedSession,
             label,
+            owner: ownerEmail,
             start: true,
             config: {
               webhooks: [
@@ -160,10 +218,13 @@ export async function GET(req: NextRequest) {
       }
 
       if (sessionStatus === "STOPPED" || sessionStatus === "FAILED") {
-        await fetchWithTimeout(`${wahaUrl}/api/sessions/${encodeURIComponent(session)}/start`, {
-          method: "POST",
-          headers,
-        });
+        await fetchWithTimeout(
+          `${wahaUrl}/api/sessions/${encodeURIComponent(scopedSession)}/start?owner=${encodeURIComponent(ownerEmail)}`,
+          {
+            method: "POST",
+            headers,
+          }
+        );
         sessionStatus = "STARTING";
       }
 
@@ -172,7 +233,7 @@ export async function GET(req: NextRequest) {
           {
             configured: true,
             connected: true,
-            session,
+            session: cleanSessionName,
             label: sessionInfo?.label || label,
             status: "WORKING",
             me: sessionInfo?.me || null,
@@ -183,7 +244,7 @@ export async function GET(req: NextRequest) {
       }
 
       const qrRes = await fetchWithTimeout(
-        `${wahaUrl}/api/${encodeURIComponent(session)}/auth/qr?format=image`,
+        `${wahaUrl}/api/${encodeURIComponent(scopedSession)}/auth/qr?format=image&owner=${encodeURIComponent(ownerEmail)}`,
         { headers }
       );
 
@@ -196,7 +257,7 @@ export async function GET(req: NextRequest) {
             {
               configured: true,
               connected: true,
-              session,
+              session: cleanSessionName,
               label,
               status: "SCAN_QR_CODE",
               qrImageDataUrl: `data:${contentType};base64,${base64}`,
@@ -219,7 +280,7 @@ export async function GET(req: NextRequest) {
             {
               configured: true,
               connected: true,
-              session,
+              session: cleanSessionName,
               label,
               status: "SCAN_QR_CODE",
               qrImageDataUrl,
@@ -233,7 +294,7 @@ export async function GET(req: NextRequest) {
         {
           configured: true,
           connected: true,
-          session,
+          session: cleanSessionName,
           label,
           status: sessionStatus || "STARTING",
           qrImageDataUrl: null,
@@ -281,7 +342,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { wahaUrl, apiKey } = config;
-  const headers = buildWahaHeaders(apiKey, { "Content-Type": "application/json" });
+  const user = await verifySessionToken(req.cookies.get(SESSION_COOKIE_NAME)?.value);
 
   try {
     if (action === "test") {
@@ -295,14 +356,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, latencyMs, version: versionData?.version || "Active" }, { headers: CORS_HEADERS });
     }
 
+    if (!user?.email) {
+      return NextResponse.json(
+        { ok: false, error: "Silakan login terlebih dahulu untuk mengelola perangkat WhatsApp." },
+        { status: 401, headers: CORS_HEADERS }
+      );
+    }
+
+    const ownerEmail = user.email.toLowerCase();
+    const scopedSession = scopeSessionForTenant(ownerEmail, session);
+    const headers = buildWahaHeaders(apiKey, { "Content-Type": "application/json" }, ownerEmail);
+
     if (action === "start") {
       const origin = req.nextUrl.origin;
       const createRes = await fetchWithTimeout(`${wahaUrl}/api/sessions`, {
         method: "POST",
         headers,
         body: JSON.stringify({
-          name: session,
+          name: scopedSession,
           label: label || session,
+          owner: ownerEmail,
           start: true,
           config: {
             webhooks: [
@@ -316,10 +389,13 @@ export async function POST(req: NextRequest) {
       });
 
       if (createRes.status === 422 || createRes.status === 409) {
-        const startRes = await fetchWithTimeout(`${wahaUrl}/api/sessions/${encodeURIComponent(session)}/start`, {
-          method: "POST",
-          headers: buildWahaHeaders(apiKey),
-        });
+        const startRes = await fetchWithTimeout(
+          `${wahaUrl}/api/sessions/${encodeURIComponent(scopedSession)}/start?owner=${encodeURIComponent(ownerEmail)}`,
+          {
+            method: "POST",
+            headers: buildWahaHeaders(apiKey, {}, ownerEmail),
+          }
+        );
         const data = await startRes.json().catch(() => ({}));
         return NextResponse.json({ ok: startRes.ok, session: data }, { headers: CORS_HEADERS });
       }
@@ -329,14 +405,20 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "logout" || action === "stop" || action === "delete") {
-      await fetchWithTimeout(`${wahaUrl}/api/sessions/${encodeURIComponent(session)}/logout`, {
-        method: "POST",
-        headers: buildWahaHeaders(apiKey),
-      }).catch(() => {});
-      await fetchWithTimeout(`${wahaUrl}/api/sessions/${encodeURIComponent(session)}`, {
-        method: "DELETE",
-        headers: buildWahaHeaders(apiKey),
-      }).catch(() => {});
+      await fetchWithTimeout(
+        `${wahaUrl}/api/sessions/${encodeURIComponent(scopedSession)}/logout?owner=${encodeURIComponent(ownerEmail)}`,
+        {
+          method: "POST",
+          headers: buildWahaHeaders(apiKey, {}, ownerEmail),
+        }
+      ).catch(() => {});
+      await fetchWithTimeout(
+        `${wahaUrl}/api/sessions/${encodeURIComponent(scopedSession)}?owner=${encodeURIComponent(ownerEmail)}`,
+        {
+          method: "DELETE",
+          headers: buildWahaHeaders(apiKey, {}, ownerEmail),
+        }
+      ).catch(() => {});
       return NextResponse.json({ ok: true, status: "STOPPED" }, { headers: CORS_HEADERS });
     }
 

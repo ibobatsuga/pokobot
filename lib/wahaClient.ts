@@ -5,8 +5,31 @@ export interface ConnectedDeviceItem {
   status: string;
 }
 
-const STORAGE_DEVICES_KEY = "pokobot_connected_devices";
-const STORAGE_ACTIVE_SESSION_KEY = "pokobot_active_session";
+const BASE_DEVICES_KEY = "pokobot_connected_devices";
+const BASE_ACTIVE_SESSION_KEY = "pokobot_active_session";
+const LEGACY_STORAGE_KEYS = [BASE_DEVICES_KEY, BASE_ACTIVE_SESSION_KEY];
+
+let currentTenantKey = "anon";
+
+function getDevicesStorageKey(): string {
+  return `${BASE_DEVICES_KEY}:${currentTenantKey}`;
+}
+
+function getActiveStorageKey(): string {
+  return `${BASE_ACTIVE_SESSION_KEY}:${currentTenantKey}`;
+}
+
+export function setActiveTenantEmail(email?: string | null) {
+  const normalized = (email || "").trim().toLowerCase();
+  currentTenantKey = normalized || "anon";
+  if (typeof window !== "undefined") {
+    // Clean up old unscoped global keys from before multi-tenant isolation
+    for (const key of LEGACY_STORAGE_KEYS) {
+      localStorage.removeItem(key);
+    }
+    window.dispatchEvent(new Event("pokobot-waha-updated"));
+  }
+}
 
 export function formatWhatsAppNumber(jid?: string | null): string {
   if (!jid) return "";
@@ -30,13 +53,16 @@ export function slugifySessionName(label: string): string {
 
 export function saveConnectedDevices(devices: ConnectedDeviceItem[]) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_DEVICES_KEY, JSON.stringify(devices));
+  const devKey = getDevicesStorageKey();
+  const actKey = getActiveStorageKey();
 
-  const active = localStorage.getItem(STORAGE_ACTIVE_SESSION_KEY);
+  localStorage.setItem(devKey, JSON.stringify(devices));
+
+  const active = localStorage.getItem(actKey);
   if (devices.length > 0 && (!active || !devices.some((d) => d.session === active))) {
-    localStorage.setItem(STORAGE_ACTIVE_SESSION_KEY, devices[0].session);
+    localStorage.setItem(actKey, devices[0].session);
   } else if (devices.length === 0) {
-    localStorage.removeItem(STORAGE_ACTIVE_SESSION_KEY);
+    localStorage.removeItem(actKey);
   }
 
   window.dispatchEvent(new Event("pokobot-waha-updated"));
@@ -45,7 +71,7 @@ export function saveConnectedDevices(devices: ConnectedDeviceItem[]) {
 export function getSavedConnectedDevices(): ConnectedDeviceItem[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(STORAGE_DEVICES_KEY);
+    const raw = localStorage.getItem(getDevicesStorageKey());
     const parsed = raw ? JSON.parse(raw) : [];
     return Array.isArray(parsed) ? parsed : [];
   } catch {
@@ -55,12 +81,12 @@ export function getSavedConnectedDevices(): ConnectedDeviceItem[] {
 
 export function getActiveSessionName(): string {
   if (typeof window === "undefined") return "default";
-  return localStorage.getItem(STORAGE_ACTIVE_SESSION_KEY) || getSavedConnectedDevices()[0]?.session || "default";
+  return localStorage.getItem(getActiveStorageKey()) || getSavedConnectedDevices()[0]?.session || "default";
 }
 
 export function setActiveSessionName(session: string) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_ACTIVE_SESSION_KEY, session);
+  localStorage.setItem(getActiveStorageKey(), session);
   window.dispatchEvent(new Event("pokobot-waha-updated"));
 }
 

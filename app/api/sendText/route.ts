@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/session";
+import { scopeSessionForTenant } from "@/lib/tenant";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -108,8 +110,13 @@ export async function POST(req: NextRequest) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
 
+        const rawToken = req.cookies.get(SESSION_COOKIE_NAME)?.value;
+        const user = await verifySessionToken(rawToken);
+        const targetSession = user?.email ? scopeSessionForTenant(user.email, session) : session;
+
         const headers: Record<string, string> = { "Content-Type": "application/json" };
         if (wahaApiKey) headers["X-Api-Key"] = wahaApiKey;
+        if (user?.email) headers["X-Owner-Email"] = user.email;
 
         const res = await fetch(`${wahaBaseUrl}/api/sendText`, {
           method: "POST",
@@ -117,7 +124,7 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             chatId: formattedChatId,
             text: text.trim(),
-            session,
+            session: targetSession,
           }),
           signal: controller.signal,
         });
