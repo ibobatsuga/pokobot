@@ -4,7 +4,12 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { PokoAppShell } from "@/components/PokoAppShell";
 import { WahaQrConnector } from "@/components/WahaQrConnector";
-import { getSavedConnectedDevice } from "@/lib/wahaClient";
+import {
+  getSavedConnectedDevices,
+  getActiveSessionName,
+  setActiveSessionName,
+  ConnectedDeviceItem,
+} from "@/lib/wahaClient";
 import {
   TrendingUp,
   Bot,
@@ -36,22 +41,28 @@ import {
 export default function PokoDashboardPage() {
   const [autoReplyEnabled, setAutoReplyEnabled] = useState(true);
   const [showQrModal, setShowQrModal] = useState(false);
-  const [connectedDevice, setConnectedDevice] = useState<{ phone: string; name: string; session: string } | null>(null);
+  const [devices, setDevices] = useState<ConnectedDeviceItem[]>([]);
+  const [activeSession, setActiveSession] = useState<string>("");
 
   useEffect(() => {
-    const sync = () => setConnectedDevice(getSavedConnectedDevice());
+    const sync = () => {
+      setDevices(getSavedConnectedDevices());
+      setActiveSession(getActiveSessionName());
+    };
     sync();
     window.addEventListener("pokobot-waha-updated", sync);
     return () => window.removeEventListener("pokobot-waha-updated", sync);
   }, []);
 
+  const connectedDevice = devices.find((d) => d.session === activeSession) || devices[0] || null;
+
   // Ping KPI Stats Cards (Clean Slate for New User)
   const kpiStats = [
     {
       title: "Device WhatsApp",
-      value: connectedDevice ? "1 / 1" : "0 / 1",
+      value: `${devices.length}`,
       unit: "Terkoneksi",
-      change: connectedDevice ? connectedDevice.phone : "Siap Scan QR",
+      change: connectedDevice ? `${connectedDevice.label} (${connectedDevice.phone})` : "Siap Scan QR",
       changeType: connectedDevice ? "positive" : "neutral",
       icon: Smartphone,
       iconBg: "bg-emerald-50 text-emerald-600 border-emerald-200",
@@ -432,7 +443,11 @@ export default function PokoDashboardPage() {
                 className="w-full py-2.5 px-4 rounded-xl bg-poko-linen text-poko-charcoal font-semibold text-xs flex items-center justify-center gap-2 hover:bg-stone-200 transition-all border border-stone-300/60"
               >
                 <QrCode className="w-4 h-4 text-emerald-600" />
-                <span>{connectedDevice ? `Terhubung: ${connectedDevice.phone}` : "Hubungkan WhatsApp Device (QR Pop-up)"}</span>
+                <span>
+                  {connectedDevice
+                    ? `Aktif: ${connectedDevice.label} (${connectedDevice.phone})`
+                    : "Hubungkan WhatsApp Device (QR Pop-up)"}
+                </span>
               </button>
             </div>
           </div>
@@ -452,12 +467,12 @@ export default function PokoDashboardPage() {
                   </h3>
                   <span
                     className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                      connectedDevice
+                      devices.length > 0
                         ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                         : "bg-stone-100 text-stone-600 border-stone-200"
                     }`}
                   >
-                    {connectedDevice ? "1 Online" : "0 Online"}
+                    {devices.length} Online
                   </span>
                 </div>
                 <Link
@@ -469,20 +484,58 @@ export default function PokoDashboardPage() {
                 </Link>
               </div>
 
-              {connectedDevice ? (
-                <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white border border-emerald-200 text-emerald-600 flex items-center justify-center">
-                      <Smartphone className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-xs text-poko-charcoal">{connectedDevice.name}</p>
-                      <p className="text-xs font-mono text-emerald-700 font-semibold">{connectedDevice.phone}</p>
-                    </div>
+              {devices.length > 0 && connectedDevice ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={connectedDevice.session}
+                      onChange={(e) => {
+                        setActiveSessionName(e.target.value);
+                        setActiveSession(e.target.value);
+                      }}
+                      aria-label="Pilih Nomor WhatsApp Aktif"
+                      className="flex-1 px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
+                    >
+                      {devices.map((d) => (
+                        <option key={d.session} value={d.session}>
+                          {d.label} ({d.phone})
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowQrModal(true)}
+                      className="px-3 py-2 rounded-xl bg-poko-charcoal text-white text-xs font-semibold hover:bg-black transition-colors shrink-0"
+                    >
+                      + Tambah
+                    </button>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                    WORKING
-                  </span>
+
+                  <div className="space-y-2">
+                    {devices.map((d) => (
+                      <div
+                        key={d.session}
+                        className={`p-3.5 rounded-2xl border flex items-center justify-between ${
+                          d.session === connectedDevice.session
+                            ? "bg-emerald-50/70 border-emerald-300"
+                            : "bg-stone-50 border-stone-200/70"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-white border border-emerald-200 text-emerald-600 flex items-center justify-center">
+                            <Smartphone className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-xs text-poko-charcoal">{d.label}</p>
+                            <p className="text-xs font-mono text-emerald-700 font-semibold">{d.phone}</p>
+                          </div>
+                        </div>
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                          {d.status || "WORKING"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <div className="p-6 rounded-2xl bg-stone-50 border border-stone-200/70 text-center space-y-3">

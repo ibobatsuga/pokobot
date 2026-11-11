@@ -4,7 +4,12 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { WahaQrConnector } from "@/components/WahaQrConnector";
-import { getSavedConnectedDevice } from "@/lib/wahaClient";
+import {
+  getSavedConnectedDevices,
+  getActiveSessionName,
+  setActiveSessionName,
+  ConnectedDeviceItem,
+} from "@/lib/wahaClient";
 import {
   LayoutDashboard,
   MessageSquare,
@@ -223,17 +228,21 @@ export const MENU_GROUPS: MenuGroup[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [connectedDevice, setConnectedDevice] = useState<{ phone: string; name: string; session: string } | null>(null);
+  const [devices, setDevices] = useState<ConnectedDeviceItem[]>([]);
+  const [activeSession, setActiveSession] = useState<string>("");
   const [showQrModal, setShowQrModal] = useState(false);
 
   useEffect(() => {
     const syncDevice = () => {
-      setConnectedDevice(getSavedConnectedDevice());
+      setDevices(getSavedConnectedDevices());
+      setActiveSession(getActiveSessionName());
     };
     syncDevice();
     window.addEventListener("pokobot-waha-updated", syncDevice);
     return () => window.removeEventListener("pokobot-waha-updated", syncDevice);
   }, []);
+
+  const activeDevice = devices.find((d) => d.session === activeSession) || devices[0] || null;
 
   return (
     <aside className="w-64 flex flex-col border-r border-poko-border bg-white justify-between select-none shrink-0 h-screen overflow-hidden">
@@ -305,27 +314,49 @@ export function Sidebar() {
 
       {/* Bottom Profile & Connection Status */}
       <div className="p-4 border-t border-poko-border bg-stone-50/50 shrink-0 space-y-3">
-        {/* Connected Device Card */}
-        {connectedDevice ? (
-          <Link
-            href="/app/device"
-            className="block p-2.5 rounded-2xl bg-white border border-emerald-200/80 shadow-xs hover:border-emerald-300 transition-colors"
-          >
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span className="font-semibold text-stone-700 flex items-center gap-1.5 text-[11px]">
+        {/* Connected Device Card with Multi-WhatsApp Dropdown */}
+        {devices.length > 0 && activeDevice ? (
+          <div className="p-2.5 rounded-2xl bg-white border border-emerald-200/80 shadow-xs space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <Link href="/app/device" className="font-semibold text-stone-700 flex items-center gap-1.5 text-[11px] hover:text-black">
                 <Phone className="w-3 h-3 text-emerald-600" />
-                WhatsApp Terhubung
-              </span>
+                <span>WhatsApp ({devices.length})</span>
+              </Link>
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
             </div>
-            <div className="text-xs font-mono text-stone-900 font-semibold truncate">
-              {connectedDevice.phone}
+
+            <select
+              value={activeDevice.session}
+              onChange={(e) => {
+                setActiveSessionName(e.target.value);
+                setActiveSession(e.target.value);
+              }}
+              aria-label="Pilih Nomor WhatsApp Aktif"
+              className="w-full px-2 py-1.5 rounded-lg bg-stone-50 border border-stone-200 text-[11px] font-semibold text-stone-800 focus:outline-none focus:ring-1 focus:ring-poko-charcoal/20"
+            >
+              {devices.map((d) => (
+                <option key={d.session} value={d.session}>
+                  {d.label} ({d.phone})
+                </option>
+              ))}
+            </select>
+
+            <div className="flex items-center justify-between gap-2 pt-0.5">
+              <Link href="/app/device" className="text-[10px] text-stone-500 hover:text-stone-800 font-medium">
+                Kelola Device
+              </Link>
+              <button
+                type="button"
+                onClick={() => setShowQrModal(true)}
+                className="text-[10px] font-semibold text-emerald-700 hover:text-emerald-900"
+              >
+                + Tambah WhatsApp
+              </button>
             </div>
-            <div className="text-[10px] text-stone-400">WAHA Cloud ({connectedDevice.session})</div>
-          </Link>
+          </div>
         ) : (
           <button
             type="button"

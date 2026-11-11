@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { PokoAppShell } from "@/components/PokoAppShell";
-import { getSavedWahaConfig, saveWahaConfig, isLocalhostUrl } from "@/lib/wahaClient";
 import {
   Sliders,
   Cpu,
@@ -55,17 +54,8 @@ export default function SettingsPage() {
   const [aiKey, setAiKey] = useState("");
   const [aiBaseUrl, setAiBaseUrl] = useState("https://api.openai.com/v1");
   const [selectedModel, setSelectedModel] = useState("gpt-4o");
-  const [wahaBaseUrl, setWahaBaseUrl] = useState("");
-  const [wahaApiKey, setWahaApiKey] = useState("");
-  const [wahaError, setWahaError] = useState<string | null>(null);
   const [whitelistInput, setWhitelistInput] = useState("");
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    const savedWaha = getSavedWahaConfig();
-    if (savedWaha.url) setWahaBaseUrl(savedWaha.url);
-    if (savedWaha.apiKey) setWahaApiKey(savedWaha.apiKey);
-  }, []);
 
   // MCP Ping Test State
   const [testResult, setTestResult] = useState<string | null>(null);
@@ -201,7 +191,7 @@ Header: Authorization (Bearer pk_live_fluxy_pokobot_enterprise)`;
             }`}
           >
             <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
-            <span>WAHA & Whitelist</span>
+            <span>Keamanan & Whitelist</span>
           </button>
         </div>
 
@@ -560,17 +550,11 @@ Header: Authorization (Bearer pk_live_fluxy_pokobot_enterprise)`;
           </form>
         )}
 
-        {/* TAB 4: WAHA & WHITELIST */}
+        {/* TAB 4: KEAMANAN & WHITELIST */}
         {activeTab === "waha" && (
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              setWahaError(null);
-              if (wahaBaseUrl.trim() && isLocalhostUrl(wahaBaseUrl)) {
-                setWahaError("Backend WAHA tidak boleh menggunakan localhost. Masukkan URL Server WAHA Cloud/VPS (https://...).");
-                return;
-              }
-              saveWahaConfig({ url: wahaBaseUrl, apiKey: wahaApiKey });
               setSaved(true);
               setTimeout(() => setSaved(false), 2500);
             }}
@@ -580,49 +564,14 @@ Header: Authorization (Bearer pk_live_fluxy_pokobot_enterprise)`;
               <div className="flex items-center gap-2.5 pb-3 border-b border-stone-100">
                 <ShieldCheck className="w-5 h-5 text-emerald-600" />
                 <div>
-                  <h3 className="font-bold text-sm text-poko-charcoal">WAHA Cloud Gateway & Keamanan Whitelist</h3>
+                  <h3 className="font-bold text-sm text-poko-charcoal">Keamanan & Whitelist Pengujian</h3>
                   <p className="text-xs text-stone-500">
-                    Hubungkan ke server WAHA Cloud / VPS Anda (tanpa ketergantungan localhost) dan atur proteksi nomor
+                    Gateway WAHA Multi-Device dikelola penuh oleh sistem backend PokoBot. Atur daftar nomor whitelist bila diperlukan.
                   </p>
                 </div>
               </div>
 
-              {wahaError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700">
-                  {wahaError}
-                </div>
-              )}
-
               <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1.5">
-                    Cloud / VPS WAHA Base URL
-                  </label>
-                  <input
-                    type="url"
-                    value={wahaBaseUrl}
-                    onChange={(e) => setWahaBaseUrl(e.target.value)}
-                    placeholder="https://waha.domainanda.com"
-                    className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-mono text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
-                  />
-                  <p className="text-[11px] text-stone-400 mt-1">
-                    Gunakan server WAHA publik (Railway, VPS Ubuntu, Coolify, Fly.io). Jangan gunakan localhost pada mode produksi.
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1.5">
-                    WAHA Server API Key (X-Api-Key)
-                  </label>
-                  <input
-                    type="password"
-                    value={wahaApiKey}
-                    onChange={(e) => setWahaApiKey(e.target.value)}
-                    placeholder="Opsional — sesuai WAHA_API_KEY di server cloud Anda"
-                    className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-mono text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
-                  />
-                </div>
-
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 mb-1.5">
                     Whitelist Nomor Pengujian (Pisahkan dengan koma)
@@ -638,7 +587,7 @@ Header: Authorization (Bearer pk_live_fluxy_pokobot_enterprise)`;
               </div>
 
               <div className="pt-4 border-t border-stone-100 flex items-center justify-between">
-                <span className="text-xs text-stone-500">Proteksi loop aktif. Tersinkronisasi dengan Device Manager QR.</span>
+                <span className="text-xs text-stone-500">Proteksi anti-loop aktif otomatis pada seluruh sesi WhatsApp.</span>
                 <button
                   type="submit"
                   className="h-9 px-4 rounded-xl text-xs font-semibold bg-poko-charcoal text-white hover:bg-black transition-all flex items-center gap-1.5 shadow-xs"

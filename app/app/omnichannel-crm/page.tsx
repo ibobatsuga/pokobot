@@ -1,8 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { WahaQrConnector } from "@/components/WahaQrConnector";
+import {
+  getSavedConnectedDevices,
+  getActiveSessionName,
+  setActiveSessionName,
+  ConnectedDeviceItem,
+} from "@/lib/wahaClient";
 import {
   MessageSquare,
   Search,
@@ -59,6 +65,17 @@ export default function OmnichannelCrmPage() {
   const [inputMessage, setInputMessage] = useState("");
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [devices, setDevices] = useState<ConnectedDeviceItem[]>([]);
+  const [selectedDeviceSession, setSelectedDeviceSession] = useState<string>("all");
+
+  useEffect(() => {
+    const syncDevices = () => {
+      setDevices(getSavedConnectedDevices());
+    };
+    syncDevices();
+    window.addEventListener("pokobot-waha-updated", syncDevices);
+    return () => window.removeEventListener("pokobot-waha-updated", syncDevices);
+  }, []);
 
   // Clean slate: 0 contacts for new user
   const [contacts, setContacts] = useState<ChatContact[]>([]);
@@ -162,6 +179,27 @@ export default function OmnichannelCrmPage() {
 
         {/* Search & Filter Tabs */}
         <div className="p-3 border-b border-poko-border bg-white space-y-2.5">
+          {devices.length > 0 && (
+            <select
+              value={selectedDeviceSession}
+              onChange={(e) => {
+                setSelectedDeviceSession(e.target.value);
+                if (e.target.value !== "all") {
+                  setActiveSessionName(e.target.value);
+                }
+              }}
+              aria-label="Filter berdasarkan Nomor WhatsApp"
+              className="w-full px-3 py-1.5 rounded-xl text-xs font-semibold bg-stone-100 text-stone-800 border-none focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
+            >
+              <option value="all">Semua WhatsApp ({devices.length} Terhubung)</option>
+              {devices.map((d) => (
+                <option key={d.session} value={d.session}>
+                  {d.label} ({d.phone})
+                </option>
+              ))}
+            </select>
+          )}
+
           <div className="relative">
             <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input

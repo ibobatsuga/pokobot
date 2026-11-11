@@ -1,7 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PokoAppShell } from "@/components/PokoAppShell";
+import {
+  getSavedConnectedDevices,
+  getActiveSessionName,
+  setActiveSessionName,
+  ConnectedDeviceItem,
+} from "@/lib/wahaClient";
 import {
   Send,
   Users,
@@ -16,10 +22,22 @@ import {
 } from "lucide-react";
 
 export default function BroadcastPage() {
+  const [devices, setDevices] = useState<ConnectedDeviceItem[]>([]);
+  const [selectedSession, setSelectedSession] = useState("default");
   const [campaignName, setCampaignName] = useState("");
   const [targetAudience, setTargetAudience] = useState("vip");
   const [delaySec, setDelaySec] = useState("8-15");
   const [messageTemplate, setMessageTemplate] = useState("");
+
+  useEffect(() => {
+    const syncDevices = () => {
+      setDevices(getSavedConnectedDevices());
+      setSelectedSession(getActiveSessionName());
+    };
+    syncDevices();
+    window.addEventListener("pokobot-waha-updated", syncDevices);
+    return () => window.removeEventListener("pokobot-waha-updated", syncDevices);
+  }, []);
 
   return (
     <PokoAppShell
@@ -33,17 +51,43 @@ export default function BroadcastPage() {
             <h3 className="font-bold text-sm text-poko-charcoal">Form Buat Kampanye Broadcast</h3>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1.5">
-                  Nama Kampanye
-                </label>
-                <input
-                  type="text"
-                  value={campaignName}
-                  onChange={(e) => setCampaignName(e.target.value)}
-                  placeholder="Contoh: Promo Spesial Pelanggan Baru"
-                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+                    Nama Kampanye
+                  </label>
+                  <input
+                    type="text"
+                    value={campaignName}
+                    onChange={(e) => setCampaignName(e.target.value)}
+                    placeholder="Contoh: Promo Spesial Pelanggan Baru"
+                    className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+                    Kirim Melalui Nomor WhatsApp
+                  </label>
+                  <select
+                    value={selectedSession}
+                    onChange={(e) => {
+                      setSelectedSession(e.target.value);
+                      setActiveSessionName(e.target.value);
+                    }}
+                    className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-poko-charcoal/20"
+                  >
+                    {devices.length > 0 ? (
+                      devices.map((d) => (
+                        <option key={d.session} value={d.session}>
+                          {d.label} ({d.phone})
+                        </option>
+                      ))
+                    ) : (
+                      <option value="default">Belum ada WhatsApp terhubung</option>
+                    )}
+                  </select>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
