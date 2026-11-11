@@ -143,9 +143,13 @@ export default function OmnichannelCrmPage() {
   });
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-white">
-      {/* 1. LEFT CONVERSATIONS LIST COLUMN (340px) */}
-      <section className="w-80 md:w-96 flex flex-col border-r border-poko-border bg-stone-50/50 shrink-0">
+    <div className="flex flex-col lg:flex-row min-h-screen lg:h-screen w-full overflow-x-hidden lg:overflow-hidden bg-white">
+      {/* 1. LEFT CONVERSATIONS LIST COLUMN (Desktop 340-384px, Mobile full width when no active chat) */}
+      <section
+        className={`${
+          activeContact ? "hidden lg:flex" : "flex"
+        } w-full lg:w-80 xl:w-96 flex-col border-r border-poko-border bg-stone-50/50 shrink-0 min-h-screen lg:min-h-0`}
+      >
         {/* Top Header */}
         <div className="p-4 border-b border-poko-border bg-white flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -303,7 +307,11 @@ export default function OmnichannelCrmPage() {
       </section>
 
       {/* 2. CENTER CHAT STREAM COLUMN */}
-      <section className="flex-1 flex flex-col bg-[#fafaf8] min-w-0">
+      <section
+        className={`${
+          activeContact ? "flex" : "hidden lg:flex"
+        } flex-1 flex-col bg-[#fafaf8] min-w-0 min-h-screen lg:min-h-0`}
+      >
         {!activeContact ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
             <div className="w-16 h-16 rounded-3xl bg-white border border-stone-200/80 shadow-subtle flex items-center justify-center text-stone-400 mb-4">
@@ -334,7 +342,15 @@ export default function OmnichannelCrmPage() {
           <>
             {/* Chat Active Header */}
             <header className="h-16 px-6 border-b border-poko-border bg-white flex items-center justify-between">
-              <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setActiveContactId(null)}
+                  aria-label="Kembali ke daftar chat"
+                  className="lg:hidden p-1.5 -ml-1 rounded-xl hover:bg-stone-100 text-stone-600 shrink-0"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
                 <div className="w-9 h-9 rounded-2xl bg-stone-200 text-stone-700 font-bold flex items-center justify-center text-xs shrink-0">
                   {activeContact.name.substring(0, 2).toUpperCase()}
                 </div>
@@ -495,8 +511,8 @@ export default function OmnichannelCrmPage() {
         )}
       </section>
 
-      {/* 3. RIGHT COLUMN: CRM PROFILE & AI CONTEXT DRAWER (320px) */}
-      <aside className="w-80 border-l border-poko-border bg-white p-5 flex flex-col justify-between overflow-y-auto shrink-0">
+      {/* 3. RIGHT COLUMN: CRM PROFILE & AI CONTEXT DRAWER (320px Desktop-only xl+) */}
+      <aside className="hidden xl:flex w-80 border-l border-poko-border bg-white p-5 flex-col justify-between overflow-y-auto shrink-0">
         {!activeContact ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center py-10 space-y-3">
             <div className="w-12 h-12 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-400">

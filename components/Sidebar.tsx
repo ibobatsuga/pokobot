@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { WahaQrConnector } from "@/components/WahaQrConnector";
+import { AuthUser } from "@/lib/session";
 import {
   getSavedConnectedDevices,
   getActiveSessionName,
@@ -42,6 +43,8 @@ import {
   Plus,
   Brain,
   Key,
+  LogOut,
+  X,
 } from "lucide-react";
 
 interface MenuItem {
@@ -226,11 +229,19 @@ export const MENU_GROUPS: MenuGroup[] = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({
+  mobileOpen = false,
+  onClose,
+}: {
+  mobileOpen?: boolean;
+  onClose?: () => void;
+}) {
   const pathname = usePathname();
+  const router = useRouter();
   const [devices, setDevices] = useState<ConnectedDeviceItem[]>([]);
   const [activeSession, setActiveSession] = useState<string>("");
   const [showQrModal, setShowQrModal] = useState(false);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
     const syncDevice = () => {
@@ -242,13 +253,36 @@ export function Sidebar() {
     return () => window.removeEventListener("pokobot-waha-updated", syncDevice);
   }, []);
 
-  const activeDevice = devices.find((d) => d.session === activeSession) || devices[0] || null;
+  useEffect(() => {
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.user) setAuthUser(data.user);
+      })
+      .catch(() => {});
+  }, []);
 
-  return (
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+    router.replace("/login");
+    router.refresh();
+  };
+
+  const activeDevice = devices.find((d) => d.session === activeSession) || devices[0] || null;
+  const displayName = authUser?.name || "Admin PokoBot";
+  const displaySub = authUser?.email || "Super Admin • Workspace";
+  const initials = displayName
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const sidebarContent = (
     <aside className="w-64 flex flex-col border-r border-poko-border bg-white justify-between select-none shrink-0 h-screen overflow-hidden">
       {/* Top Header Logo */}
-      <div className="p-5 border-b border-poko-border shrink-0">
-        <Link href="/app" className="flex items-center gap-3">
+      <div className="p-5 border-b border-poko-border shrink-0 flex items-center justify-between">
+        <Link href="/app" onClick={onClose} className="flex items-center gap-3">
           <img
             src="/logo.png"
             alt="PokoBot"
@@ -261,6 +295,16 @@ export function Sidebar() {
             <p className="text-[11px] text-stone-400 mt-1">by FLUXY.ID</p>
           </div>
         </Link>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Tutup menu"
+            className="lg:hidden p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Navigation Groups (Scrollable) */}
@@ -282,6 +326,7 @@ export function Sidebar() {
                 <Link
                   key={iIdx}
                   href={item.href}
+                  onClick={onClose}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                     isActive
                       ? "bg-poko-linen text-poko-charcoal font-semibold shadow-xs border border-stone-300/50"
@@ -381,17 +426,37 @@ export function Sidebar() {
           </button>
         )}
 
-        {/* User profile */}
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-poko-charcoal text-white flex items-center justify-center font-semibold text-xs">
-              PB
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-poko-charcoal leading-none">Admin PokoBot</p>
-              <p className="text-[10px] text-stone-400 mt-1">Super Admin • Workspace</p>
+        {/* User profile & Logout */}
+        <div className="flex items-center justify-between gap-2 px-1">
+          <div className="flex items-center gap-2 min-w-0">
+            {authUser?.avatar ? (
+              <img
+                src={authUser.avatar}
+                alt={displayName}
+                className="w-8 h-8 rounded-full object-cover border border-stone-200 shrink-0"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-poko-charcoal text-white flex items-center justify-center font-semibold text-xs shrink-0">
+                {initials}
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-poko-charcoal leading-none truncate">
+                {displayName}
+              </p>
+              <p className="text-[10px] text-stone-400 mt-1 truncate">{displaySub}</p>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="Keluar dari akun"
+            aria-label="Keluar dari akun"
+            className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors shrink-0"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
@@ -403,5 +468,24 @@ export function Sidebar() {
         onConnected={() => setShowQrModal(false)}
       />
     </aside>
+  );
+
+  return (
+    <>
+      {/* Desktop-first fixed sidebar (visible >= lg) */}
+      <div className="hidden lg:flex shrink-0">{sidebarContent}</div>
+
+      {/* Tablet/Mobile slide-over drawer (< lg) */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 flex lg:hidden">
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-[1px]"
+            onClick={onClose}
+            aria-hidden="true"
+          />
+          <div className="relative z-10 flex h-full">{sidebarContent}</div>
+        </div>
+      )}
+    </>
   );
 }
