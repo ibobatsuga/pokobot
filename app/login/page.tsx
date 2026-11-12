@@ -204,7 +204,7 @@ function LoginFormContent() {
                 className="w-full h-11 px-4 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-poko-charcoal text-xs sm:text-sm font-semibold flex items-center justify-center gap-3 transition-all shadow-xs"
               >
                 <GoogleIcon />
-                <span>Masuk dengan Gmail (Google)</span>
+                <span>Masuk dengan Google</span>
               </a>
 
               {googleReady === false && (
