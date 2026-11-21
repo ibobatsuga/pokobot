@@ -5,8 +5,10 @@ import Link from "next/link";
 import { WahaQrConnector } from "@/components/WahaQrConnector";
 import {
   getSavedConnectedDevices,
+  saveConnectedDevices,
   getActiveSessionName,
   setActiveSessionName,
+  formatWhatsAppNumber,
   ConnectedDeviceItem,
 } from "@/lib/wahaClient";
 import {
@@ -74,6 +76,27 @@ export default function OmnichannelCrmPage() {
     };
     syncDevices();
     window.addEventListener("pokobot-waha-updated", syncDevices);
+
+    fetch("/api/waha?action=sessions", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data?.sessions)) {
+          const mapped: ConnectedDeviceItem[] = data.sessions
+            .filter((s: any) => s.status === "WORKING" || s.me?.id)
+            .map((s: any) => ({
+              session: s.name || "default",
+              label: s.label || s.name || "WhatsApp",
+              phone: formatWhatsAppNumber(s.me?.id) || "Terhubung",
+              status: s.status || "WORKING",
+            }));
+          if (mapped.length > 0) {
+            saveConnectedDevices(mapped);
+            setDevices(mapped);
+          }
+        }
+      })
+      .catch(() => {});
+
     return () => window.removeEventListener("pokobot-waha-updated", syncDevices);
   }, []);
 

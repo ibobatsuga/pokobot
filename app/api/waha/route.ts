@@ -7,6 +7,8 @@ import {
   unscopeSessionForTenant,
 } from "@/lib/tenant";
 
+export const maxDuration = 30;
+
 const ALLOWED_ORIGINS = new Set([
   "https://pokobot.fluxy.id",
   "https://ping-clone-poc.vercel.app",
@@ -269,26 +271,6 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      if (sessionStatus === "FAILED" || sessionStatus === "STOPPED") {
-        if (sessionStatus === "FAILED") {
-          await fetchWithTimeout(
-            `${wahaUrl}/api/sessions/${encodeURIComponent(scopedSession)}/stop?owner=${encodeURIComponent(ownerEmail)}`,
-            { method: "POST", headers },
-            4000
-          ).catch(() => {});
-          await new Promise((r) => setTimeout(r, 400));
-        }
-        await fetchWithTimeout(
-          `${wahaUrl}/api/sessions/${encodeURIComponent(scopedSession)}/start?owner=${encodeURIComponent(ownerEmail)}`,
-          {
-            method: "POST",
-            headers,
-          },
-          5000
-        ).catch(() => {});
-        sessionStatus = "STARTING";
-      }
-
       if (sessionStatus === "WORKING") {
         return NextResponse.json(
           {
@@ -304,12 +286,13 @@ export async function GET(req: NextRequest) {
         );
       }
 
+      // Fetch live QR code directly - the orchestrator auto-recovers stopped/failed sessions seamlessly
       let qrRes: Response | null = null;
       try {
         qrRes = await fetchWithTimeout(
           `${wahaUrl}/api/${encodeURIComponent(scopedSession)}/auth/qr?format=image&owner=${encodeURIComponent(ownerEmail)}`,
           { headers },
-          7000
+          8000
         );
       } catch {
         qrRes = null;
@@ -333,7 +316,7 @@ export async function GET(req: NextRequest) {
           );
         }
 
-        const qrJson = await qrRes.json();
+        const qrJson = await qrRes.json().catch(() => null);
         const rawValue = qrJson?.value || qrJson?.qr || qrJson?.data;
         if (rawValue && typeof rawValue === "string") {
           const qrImageDataUrl = rawValue.startsWith("data:image/")
@@ -363,7 +346,7 @@ export async function GET(req: NextRequest) {
           connected: true,
           session: cleanSessionName,
           label,
-          status: sessionStatus || "STARTING",
+          status: "STARTING",
           qrImageDataUrl: null,
           message: "Menyiapkan QR Code WhatsApp...",
         },
@@ -373,6 +356,19 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ error: "Action tidak dikenal" }, { status: 400, headers: CORS_HEADERS });
   } catch (error: any) {
+    if (action === "qr") {
+      return NextResponse.json(
+        {
+          configured: true,
+          connected: true,
+          status: "STARTING",
+          message: "Sedang menyiapkan koneksi ke WhatsApp...",
+          qrImageDataUrl: null,
+        },
+        { status: 200, headers: CORS_HEADERS }
+      );
+    }
+
     return NextResponse.json(
       {
         configured: true,

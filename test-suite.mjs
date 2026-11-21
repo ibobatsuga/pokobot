@@ -220,6 +220,93 @@ async function runTests() {
     assert(false, "/api/sendText Suite network error", err.message);
   }
 
+  // --- 4.5. FILE DISPATCHER (/api/sendFile) SUITE ---
+  console.log(`\n[TEST GROUP 4.5] File Dispatcher (/api/sendFile) Suite`);
+  try {
+    // 4.5a. CORS Preflight
+    const optRes = await fetch(`${BASE_URL}/api/sendFile`, { method: "OPTIONS" });
+    assert(optRes.status === 204, "OPTIONS /api/sendFile returns 204 Preflight");
+
+    // 4.5b. GET Documentation
+    const getRes = await fetch(`${BASE_URL}/api/sendFile`);
+    assert(getRes.status === 200, "GET /api/sendFile returns HTTP 200 overview");
+
+    // 4.5c. POST Valid Dispatch via URL with Caption
+    const sendUrl = await fetch(`${BASE_URL}/api/sendFile`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer pk_live_fluxy_pokobot_enterprise",
+      },
+      body: JSON.stringify({
+        chatId: "6281234567890@c.us",
+        caption: "Invoice PDF Document",
+        file: {
+          url: "https://example.com/invoice.pdf",
+          filename: "invoice.pdf",
+          mimetype: "application/pdf",
+        },
+        session: "default",
+      }),
+    });
+    const sendUrlData = await sendUrl.json();
+    assert(sendUrl.status === 200, "POST /api/sendFile valid URL dispatch returns 200");
+    assert(sendUrlData.status === "success", "Payload confirmed file status: success");
+    assert(Boolean(sendUrlData.messageId), `Generated file messageId: ${sendUrlData.messageId}`);
+    assert(sendUrlData.caption === "Invoice PDF Document", "Caption preserved in dispatch");
+
+    // 4.5d. POST Valid Dispatch via Base64 with Caption
+    const sendB64 = await fetch(`${BASE_URL}/api/sendFile`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer pk_live_fluxy_pokobot_enterprise",
+      },
+      body: JSON.stringify({
+        phone: "6281234567890",
+        caption: "Screenshot bukti transfer",
+        fileBase64: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+        fileName: "proof.png",
+        mimeType: "image/png",
+      }),
+    });
+    const sendB64Data = await sendB64.json();
+    assert(sendB64.status === 200, "POST /api/sendFile valid Base64 dispatch returns 200");
+    assert(sendB64Data.status === "success", "Payload confirmed base64 status: success");
+
+    // 4.5e. POST Missing Destination
+    const sendMissingDest = await fetch(`${BASE_URL}/api/sendFile`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fileUrl: "https://example.com/file.pdf" }),
+    });
+    assert(sendMissingDest.status === 422, "Missing chatId in sendFile returns HTTP 422");
+
+    // 4.5f. POST Missing File
+    const sendMissingFile = await fetch(`${BASE_URL}/api/sendFile`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chatId: "6281234567890@c.us", caption: "Caption only without file" }),
+    });
+    assert(sendMissingFile.status === 422, "Missing file in sendFile returns HTTP 422");
+
+    // 4.5g. POST Unauthorized Key
+    const sendBadAuth = await fetch(`${BASE_URL}/api/sendFile`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer invalid_key_attempt",
+      },
+      body: JSON.stringify({
+        chatId: "6281234567890@c.us",
+        fileUrl: "https://example.com/test.pdf",
+      }),
+    });
+    assert(sendBadAuth.status === 401, "Invalid API key in sendFile returns HTTP 401");
+  } catch (err) {
+    assert(false, "/api/sendFile Suite network error", err.message);
+  }
+
   // --- 5. WEBHOOK GATEWAY (/api/webhook) DEFENSIVE SUITE ---
   console.log(`\n[TEST GROUP 5] Webhook Gateway Defensive Suite`);
   try {

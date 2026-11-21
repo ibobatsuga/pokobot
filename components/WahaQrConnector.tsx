@@ -88,8 +88,8 @@ export function WahaQrConnector({
 
         if (data.connected === false && data.error) {
           if (data.error.includes("Timeout") || data.error.includes("tertunda")) {
-            // Transient timeout during container restart: show soft notice and keep polling
-            setErrorMsg("Sedang menyiapkan sesi WhatsApp di server... (Menyambungkan otomatis)");
+            // Transient timeout during container restart: keep status STARTING and polling without scary error banner
+            setErrorMsg(null);
             setStatus("STARTING");
             setLoading(false);
             return;
