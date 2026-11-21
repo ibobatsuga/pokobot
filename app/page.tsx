@@ -6,8 +6,10 @@ import { PokoAppShell } from "@/components/PokoAppShell";
 import { WahaQrConnector } from "@/components/WahaQrConnector";
 import {
   getSavedConnectedDevices,
+  saveConnectedDevices,
   getActiveSessionName,
   setActiveSessionName,
+  formatWhatsAppNumber,
   ConnectedDeviceItem,
 } from "@/lib/wahaClient";
 import {
@@ -51,6 +53,26 @@ export default function PokoDashboardPage() {
     };
     sync();
     window.addEventListener("pokobot-waha-updated", sync);
+
+    fetch("/api/waha?action=sessions", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data?.sessions)) {
+          const mapped: ConnectedDeviceItem[] = data.sessions
+            .filter((s: any) => s.status === "WORKING" || s.me?.id)
+            .map((s: any) => ({
+              session: s.name || "default",
+              label: s.label || s.name || "WhatsApp",
+              phone: formatWhatsAppNumber(s.me?.id) || "Terhubung",
+              status: s.status || "WORKING",
+            }));
+          saveConnectedDevices(mapped);
+          setDevices(mapped);
+          setActiveSession(getActiveSessionName());
+        }
+      })
+      .catch(() => {});
+
     return () => window.removeEventListener("pokobot-waha-updated", sync);
   }, []);
 
