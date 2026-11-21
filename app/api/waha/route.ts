@@ -269,14 +269,23 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      if (sessionStatus === "STOPPED" || sessionStatus === "FAILED") {
+      if (sessionStatus === "FAILED" || sessionStatus === "STOPPED") {
+        if (sessionStatus === "FAILED") {
+          await fetchWithTimeout(
+            `${wahaUrl}/api/sessions/${encodeURIComponent(scopedSession)}/stop?owner=${encodeURIComponent(ownerEmail)}`,
+            { method: "POST", headers },
+            4000
+          ).catch(() => {});
+          await new Promise((r) => setTimeout(r, 400));
+        }
         await fetchWithTimeout(
           `${wahaUrl}/api/sessions/${encodeURIComponent(scopedSession)}/start?owner=${encodeURIComponent(ownerEmail)}`,
           {
             method: "POST",
             headers,
-          }
-        );
+          },
+          5000
+        ).catch(() => {});
         sessionStatus = "STARTING";
       }
 
@@ -295,12 +304,18 @@ export async function GET(req: NextRequest) {
         );
       }
 
-      const qrRes = await fetchWithTimeout(
-        `${wahaUrl}/api/${encodeURIComponent(scopedSession)}/auth/qr?format=image&owner=${encodeURIComponent(ownerEmail)}`,
-        { headers }
-      );
+      let qrRes: Response | null = null;
+      try {
+        qrRes = await fetchWithTimeout(
+          `${wahaUrl}/api/${encodeURIComponent(scopedSession)}/auth/qr?format=image&owner=${encodeURIComponent(ownerEmail)}`,
+          { headers },
+          7000
+        );
+      } catch {
+        qrRes = null;
+      }
 
-      if (qrRes.ok) {
+      if (qrRes && qrRes.ok) {
         const contentType = qrRes.headers.get("content-type") || "";
         if (contentType.includes("image/")) {
           const arrayBuffer = await qrRes.arrayBuffer();

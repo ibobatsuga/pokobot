@@ -87,6 +87,13 @@ export function WahaQrConnector({
         }
 
         if (data.connected === false && data.error) {
+          if (data.error.includes("Timeout") || data.error.includes("tertunda")) {
+            // Transient timeout during container restart: show soft notice and keep polling
+            setErrorMsg("Sedang menyiapkan sesi WhatsApp di server... (Menyambungkan otomatis)");
+            setStatus("STARTING");
+            setLoading(false);
+            return;
+          }
           setErrorMsg(data.error);
           setQrImageDataUrl(null);
           setStatus("ERROR");
@@ -132,14 +139,24 @@ export function WahaQrConnector({
 
   // Initialize a fresh session ID when opening or switching to add new WhatsApp
   const startNewQrFlow = useCallback(
-    (customLabel?: string) => {
+    async (customLabel?: string) => {
       const label = (customLabel ?? deviceLabel).trim() || "WhatsApp Bisnis";
       const existingDevices = getSavedConnectedDevices();
       const newSessId = existingDevices.length === 0 ? "default" : slugifySessionName(label);
       setSessionId(newSessId);
       setStatus("STARTING");
       setQrImageDataUrl(null);
-      fetchQr(newSessId, label);
+      setErrorMsg(null);
+      setLoading(true);
+
+      // Force refresh session state on backend so WAHA starts with a fresh socket
+      await fetch("/api/waha", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "start", session: newSessId, label }),
+      }).catch(() => {});
+
+      await fetchQr(newSessId, label);
     },
     [deviceLabel, fetchQr]
   );
