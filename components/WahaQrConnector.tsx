@@ -164,7 +164,25 @@ export function WahaQrConnector({
   useEffect(() => {
     if (mode === "modal" && !isOpen) return;
     if (!sessionId) {
-      startNewQrFlow();
+      fetch("/api/waha?action=sessions", { cache: "no-store" })
+        .then((r) => r.json())
+        .then((data) => {
+          if (Array.isArray(data?.sessions)) {
+            const mapped = data.sessions
+              .filter((s: any) => s.status === "WORKING" || s.me?.id)
+              .map((s: any) => ({
+                session: s.name || "default",
+                label: s.label || s.name || "WhatsApp",
+                phone: formatWhatsAppNumber(s.me?.id) || "Terhubung",
+                status: s.status || "WORKING",
+              }));
+            saveConnectedDevices(mapped);
+          }
+          startNewQrFlow();
+        })
+        .catch(() => {
+          startNewQrFlow();
+        });
     }
   }, [mode, isOpen, sessionId, startNewQrFlow]);
 

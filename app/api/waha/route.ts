@@ -317,6 +317,20 @@ export async function GET(req: NextRequest) {
         }
 
         const qrJson = await qrRes.json().catch(() => null);
+        if (qrJson?.status === "WORKING") {
+          return NextResponse.json(
+            {
+              configured: true,
+              connected: true,
+              session: cleanSessionName,
+              label: qrJson?.label || label,
+              status: "WORKING",
+              me: qrJson?.me || null,
+              qrImageDataUrl: null,
+            },
+            { headers: CORS_HEADERS }
+          );
+        }
         const rawValue = qrJson?.value || qrJson?.qr || qrJson?.data;
         if (rawValue && typeof rawValue === "string") {
           const qrImageDataUrl = rawValue.startsWith("data:image/")
