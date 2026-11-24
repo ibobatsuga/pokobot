@@ -21,6 +21,8 @@ import {
   Zap,
   Bot,
   Sparkles,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -63,6 +65,7 @@ export default function SettingsPage() {
   }, []);
 
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [revealedKeys, setRevealedKeys] = useState<Record<string, boolean>>({});
   const [copiedConfig, setCopiedConfig] = useState(false);
   const [selectedClient, setSelectedClient] = useState<"claude" | "cursor" | "antigravity" | "gpt">("claude");
 
@@ -443,9 +446,27 @@ Header: Authorization (Bearer ${personalKey})`;
                       </span>
                     </div>
 
-                    <p className="font-mono text-xs text-stone-500 bg-white px-2 py-1 rounded-lg border border-stone-200 inline-block">
-                      {key.prefix}••••••••••••
-                    </p>
+                    <div className="flex items-center gap-2 pt-1 max-w-full">
+                      <p className="font-mono text-xs text-stone-600 bg-white px-2.5 py-1.5 rounded-lg border border-stone-200 inline-block break-all max-w-[280px] sm:max-w-md select-all">
+                        {revealedKeys[key.id]
+                          ? key.prefix
+                          : `${key.prefix.slice(0, 14)}••••••••••••••••${key.prefix.slice(-6)}`}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setRevealedKeys((prev) => ({ ...prev, [key.id]: !prev[key.id] }))
+                        }
+                        title={revealedKeys[key.id] ? "Sembunyikan API Key" : "Tampilkan API Key lengkap"}
+                        className="p-1.5 rounded-lg border border-stone-200 bg-white text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors shrink-0"
+                      >
+                        {revealedKeys[key.id] ? (
+                          <EyeOff className="w-3.5 h-3.5" />
+                        ) : (
+                          <Eye className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
 
                     <div className="flex items-center gap-2 text-[10px] text-stone-400 pt-1">
                       <span>Dibuat: {key.created}</span>
@@ -457,12 +478,12 @@ Header: Authorization (Bearer ${personalKey})`;
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleCopy(key.prefix, key.id)}
-                      className="h-8 px-3 rounded-xl border border-stone-200 text-xs font-semibold text-stone-700 bg-white hover:bg-stone-100 flex items-center gap-1.5 transition-colors"
+                      className="h-8 px-3 rounded-xl border border-stone-200 text-xs font-semibold text-stone-700 bg-white hover:bg-stone-100 flex items-center gap-1.5 transition-colors shrink-0"
                     >
                       {copiedKey === key.id ? (
                         <>
                           <Check className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>Disalin!</span>
+                          <span>Disalin Lengkap!</span>
                         </>
                       ) : (
                         <>
