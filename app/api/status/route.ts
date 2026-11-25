@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SESSION_COOKIE_NAME, verifySessionToken, verifyUserApiKey } from "@/lib/session";
+import { SESSION_COOKIE_NAME, verifySessionToken, verifyUserApiKey, getUserPlanInfo } from "@/lib/session";
 
 export const maxDuration = 30;
 
@@ -96,6 +96,8 @@ export async function GET(req: NextRequest) {
     ? process.env.POKOBOT_WHITELIST.split(",").map((s) => s.trim())
     : [];
 
+  const planInfo = getUserPlanInfo(ownerEmail);
+
   return NextResponse.json(
     {
       status: "ok",
@@ -106,6 +108,14 @@ export async function GET(req: NextRequest) {
       phone: livePhone,
       session: liveSession,
       push_name: livePushName,
+      plan: planInfo.plan,
+      credits: planInfo.credits,
+      is_unlimited: planInfo.isUnlimited,
+      quota: {
+        status: planInfo.isUnlimited ? "UNLIMITED" : "ACTIVE",
+        remaining: planInfo.credits,
+        limit: planInfo.isUnlimited ? -1 : 50,
+      },
       engine: {
         whatsapp: "WAHA (WhatsApp HTTP API)",
         session: liveSession,

@@ -61,7 +61,7 @@ async function runTests() {
     const getData = await getRes.json();
     assert(getRes.status === 200, "GET /api/mcp returns HTTP 200");
     assert(getData.server.name === "pokobot-mcp-server", "MCP server name verified");
-    assert(Array.isArray(getData.tools) && getData.tools.length === 6, "MCP exposes exactly 6 tools");
+    assert(Array.isArray(getData.tools) && getData.tools.length === 7, "MCP exposes 7 tools including file/image dispatch");
     assert(Boolean(getData.clientsConfig.claudeDesktop), "Claude Desktop configuration provided");
     assert(Boolean(getData.clientsConfig.cursor), "Cursor IDE configuration provided");
 
@@ -82,7 +82,31 @@ async function runTests() {
       body: JSON.stringify({ jsonrpc: "2.0", id: 102, method: "tools/list" }),
     });
     const listData = await listRes.json();
-    assert(listData.result.tools.length === 6, "tools/list returned 6 tools");
+    assert(listData.result.tools.length === 7, "tools/list returned 7 tools");
+
+    // 3e-file. MCP Tool Call: pokobot_send_whatsapp_file
+    const callFile = await fetch(`${BASE_URL}/api/mcp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1031,
+        method: "tools/call",
+        params: {
+          name: "pokobot_send_whatsapp_file",
+          arguments: {
+            phone: "6281234567890",
+            fileUrl: "https://example.com/katalog.jpg",
+            mimetype: "image/jpeg",
+            filename: "katalog.jpg",
+            caption: "Katalog Produk Terbaru",
+          },
+        },
+      }),
+    });
+    const callFileData = await callFile.json();
+    assert(callFile.status === 200, "Tool call 'pokobot_send_whatsapp_file' returns 200");
+    assert(callFileData.result.content[0].text.includes("berhasil dikirim"), "File/Image dispatch content verified");
 
     // 3e. MCP Tool Call: pokobot_send_whatsapp_message
     const call1 = await fetch(`${BASE_URL}/api/mcp`, {

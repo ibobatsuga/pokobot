@@ -3,11 +3,44 @@ export const ACCOUNT_COOKIE_NAME = "pokobot_account";
 export const OAUTH_STATE_COOKIE_NAME = "pokobot_oauth_state";
 export const USER_API_KEY_PREFIX = "pk_user_";
 
+export const UNLIMITED_USER_EMAILS = new Set([
+  "ibobatsuga@gmail.com",
+  "bikinjingleboongan@gmail.com",
+  "sundayspinc@gmail.com",
+  "academy.indovoiceover@gmail.com",
+  "warnosiswanto86@gmail.com",
+]);
+
+export function isUnlimitedUser(email?: string | null): boolean {
+  if (!email) return false;
+  const clean = email.trim().toLowerCase();
+  if (UNLIMITED_USER_EMAILS.has(clean)) return true;
+  const envList = (process.env.POKOBOT_UNLIMITED_USERS || "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  return envList.includes(clean);
+}
+
+export function getUserPlanInfo(email?: string | null) {
+  const unlimited = isUnlimitedUser(email);
+  return {
+    isUnlimited: unlimited,
+    plan: unlimited ? "Enterprise Unlimited" : "Starter Gratis",
+    credits: unlimited ? "Unlimited" : 50,
+    maxDevices: unlimited ? "Unlimited" : 1,
+    maxMessages: unlimited ? "Unlimited" : 50,
+  };
+}
+
 export interface AuthUser {
   email: string;
   name: string;
   avatar?: string;
   provider: "google" | "email";
+  plan?: string;
+  credits?: string | number;
+  isUnlimited?: boolean;
 }
 
 interface SignedSessionPayload extends AuthUser {

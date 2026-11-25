@@ -35,6 +35,48 @@ const POKOBOT_MCP_TOOLS = [
     },
   },
   {
+    name: "pokobot_send_whatsapp_file",
+    description:
+      "Kirim file dokumen (PDF, DOCX, XLSX, ZIP) atau gambar/foto (JPG, PNG, WebP) beserta caption ke nomor WhatsApp tujuan menggunakan WAHA instance aktif.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        phone: {
+          type: "string",
+          description: "Nomor WhatsApp tujuan dengan format internasional (contoh: 6281234567890).",
+        },
+        fileUrl: {
+          type: "string",
+          description:
+            "URL publik langsung ke file atau gambar yang ingin dikirim (contoh: https://example.com/invoice.pdf atau https://example.com/poster.jpg). Mendukung juga Base64 / data URI.",
+        },
+        url: {
+          type: "string",
+          description: "Alias untuk fileUrl (URL file atau gambar yang ingin dikirim).",
+        },
+        mimetype: {
+          type: "string",
+          description:
+            "MIME type file atau gambar (contoh: 'application/pdf', 'image/jpeg', 'image/png'). Otomatis dideteksi jika dikosongkan.",
+        },
+        filename: {
+          type: "string",
+          description: "Nama file yang ditampilkan di WhatsApp (contoh: 'Invoice_2026.pdf' atau 'Promo.jpg').",
+        },
+        caption: {
+          type: "string",
+          description: "Keterangan / caption teks pendamping file atau gambar (opsional).",
+        },
+        session: {
+          type: "string",
+          description: "Nama session WAHA yang digunakan (default: 'default').",
+          default: "default",
+        },
+      },
+      required: ["phone"],
+    },
+  },
+  {
     name: "pokobot_get_chats",
     description:
       "Mengambil daftar percakapan WhatsApp aktif, pesan terakhir, unread count, dan status CRM.",
@@ -340,6 +382,183 @@ export async function POST(request: NextRequest) {
                   {
                     type: "text",
                     text: `[PokoBot WAHA] Pesan WhatsApp${ownerEmail ? "" : " (sandbox mode)"} berhasil dikirim ke ${phone} via session '${session}': "${message}"`,
+                  },
+                ],
+              },
+            },
+            { headers: CORS_HEADERS }
+          );
+        }
+
+        case "pokobot_send_whatsapp_file":
+        case "pokobot_send_whatsapp_image": {
+          const targetPhone = toolArgs.phone || toolArgs.chatId;
+          const rawFile = toolArgs.file;
+          const rawUrl =
+            toolArgs.fileUrl ||
+            toolArgs.file_url ||
+            toolArgs.url ||
+            toolArgs.imageUrl ||
+            toolArgs.image_url ||
+            (typeof rawFile === "object" ? rawFile?.url || rawFile?.fileUrl : undefined) ||
+            (typeof rawFile === "string" && /^https?:\/\//i.test(rawFile) ? rawFile : undefined);
+          let rawData =
+            toolArgs.data ||
+            toolArgs.fileBase64 ||
+            toolArgs.base64 ||
+            (typeof rawFile === "object" ? rawFile?.data || rawFile?.base64 || rawFile?.fileBase64 : undefined) ||
+            (typeof rawFile === "string" && !/^https?:\/\//i.test(rawFile) ? rawFile : undefined);
+          let mimetype =
+            toolArgs.mimetype ||
+            toolArgs.mimeType ||
+            toolArgs.mime_type ||
+            (typeof rawFile === "object" ? rawFile?.mimetype || rawFile?.mimeType : undefined);
+          let filename =
+            toolArgs.filename ||
+            toolArgs.fileName ||
+            toolArgs.file_name ||
+            (typeof rawFile === "object" ? rawFile?.filename || rawFile?.fileName || rawFile?.name : undefined);
+          const caption =
+            typeof toolArgs.caption === "string"
+              ? toolArgs.caption
+              : typeof toolArgs.message === "string"
+              ? toolArgs.message
+              : typeof toolArgs.text === "string"
+              ? toolArgs.text
+              : "";
+          const session = String(toolArgs.session || "default");
+
+          let finalUrl = typeof rawUrl === "string" ? rawUrl.trim() : undefined;
+          if (finalUrl && finalUrl.startsWith("data:")) {
+            rawData = finalUrl;
+            finalUrl = undefined;
+          }
+
+          if (rawData && typeof rawData === "string" && rawData.includes(";base64,")) {
+            const parts = rawData.split(";base64,");
+            if (!mimetype && parts[0].startsWith("data:")) {
+              mimetype = parts[0].slice(5);
+            }
+            rawData = parts[1];
+          }
+
+          if (!targetPhone || (!finalUrl && !rawData)) {
+            return NextResponse.json(
+              {
+                jsonrpc: "2.0",
+                id,
+                error: {
+                  code: -32602,
+                  message:
+                    "Invalid params: 'phone' and 'fileUrl' (or 'url' / 'data') are required arguments",
+                },
+              },
+              { status: 400, headers: CORS_HEADERS }
+            );
+          }
+
+          // Auto-infer filename & mimetype when omitted
+          const cleanUrlPath = finalUrl ? finalUrl.split("?")[0].split("#")[0] : "";
+          if (!filename && cleanUrlPath) {
+            const base = cleanUrlPath.split("/").pop();
+            if (base && base.includes(".")) filename = decodeURIComponent(base);
+          }
+          const extCheck = (filename || cleanUrlPath || "").toLowerCase();
+          if (!mimetype) {
+            if (extCheck.endsWith(".jpg") || extCheck.endsWith(".jpeg")) mimetype = "image/jpeg";
+            else if (extCheck.endsWith(".png")) mimetype = "image/png";
+            else if (extCheck.endsWith(".webp")) mimetype = "image/webp";
+            else if (extCheck.endsWith(".gif")) mimetype = "image/gif";
+            else if (extCheck.endsWith(".pdf")) mimetype = "application/pdf";
+            else if (extCheck.endsWith(".doc")) mimetype = "application/msword";
+            else if (extCheck.endsWith(".docx"))
+              mimetype = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            else if (extCheck.endsWith(".xls")) mimetype = "application/vnd.ms-excel";
+            else if (extCheck.endsWith(".xlsx"))
+              mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            else if (extCheck.endsWith(".zip")) mimetype = "application/zip";
+            else if (extCheck.endsWith(".mp4")) mimetype = "video/mp4";
+            else if (extCheck.endsWith(".mp3")) mimetype = "audio/mpeg";
+            else if (extCheck.endsWith(".txt")) mimetype = "text/plain";
+          }
+          if (!filename) {
+            if (mimetype && mimetype.startsWith("image/")) {
+              const sub = mimetype.split("/")[1]?.split(";")[0] || "jpg";
+              filename = `image.${sub === "jpeg" ? "jpg" : sub}`;
+            } else if (mimetype === "application/pdf") {
+              filename = "document.pdf";
+            } else {
+              filename = "file";
+            }
+          }
+
+          const resolvedFile: Record<string, string> = {};
+          if (finalUrl) resolvedFile.url = finalUrl;
+          if (rawData) resolvedFile.data = String(rawData);
+          if (mimetype) resolvedFile.mimetype = String(mimetype);
+          if (filename) resolvedFile.filename = String(filename);
+
+          if (ownerEmail) {
+            const wahaUrl = (process.env.WAHA_BASE_URL || "").trim().replace(/\/+$/, "");
+            if (wahaUrl && !/^https?:\/\/(localhost|127\.0\.0\.1)/i.test(wahaUrl)) {
+              const cleanedDigits = String(targetPhone).replace(/[^0-9]/g, "");
+              const chatId = String(targetPhone).includes("@")
+                ? String(targetPhone)
+                : `${cleanedDigits}@c.us`;
+              const headers: Record<string, string> = {
+                "Content-Type": "application/json",
+                "X-Owner-Email": ownerEmail,
+              };
+              if (process.env.WAHA_API_KEY) headers["X-Api-Key"] = process.env.WAHA_API_KEY;
+
+              const forwardPayload: Record<string, any> = {
+                chatId,
+                file: resolvedFile,
+                session: scopeSessionForTenant(ownerEmail, session),
+              };
+              if (caption) {
+                forwardPayload.caption = caption;
+              }
+              if (toolName === "pokobot_send_whatsapp_image") {
+                forwardPayload.asImage = true;
+              }
+
+              const dispatchRes = await fetch(`${wahaUrl}/api/sendFile`, {
+                method: "POST",
+                headers,
+                body: JSON.stringify(forwardPayload),
+              });
+
+              if (!dispatchRes.ok) {
+                const errJson = await dispatchRes.json().catch(() => ({}));
+                return NextResponse.json(
+                  {
+                    jsonrpc: "2.0",
+                    id,
+                    error: {
+                      code: -32000,
+                      message:
+                        errJson?.error || `Gagal mengirim file/gambar WhatsApp (${dispatchRes.status})`,
+                    },
+                  },
+                  {
+                    status: dispatchRes.status >= 400 && dispatchRes.status < 500 ? dispatchRes.status : 502,
+                    headers: CORS_HEADERS,
+                  }
+                );
+              }
+            }
+          }
+
+          return NextResponse.json(
+            {
+              jsonrpc: "2.0",
+              id,
+              result: {
+                content: [
+                  {
+                    type: "text",
+                    text: `[PokoBot WAHA] File/Gambar WhatsApp${ownerEmail ? "" : " (sandbox mode)"} '${resolvedFile.filename || "media"}' (${resolvedFile.mimetype || "auto"}) berhasil dikirim ke ${targetPhone} via session '${session}'${caption ? ` dengan caption: "${caption}"` : ""}.`,
                   },
                 ],
               },

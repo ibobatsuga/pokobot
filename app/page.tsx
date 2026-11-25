@@ -45,6 +45,8 @@ export default function PokoDashboardPage() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [devices, setDevices] = useState<ConnectedDeviceItem[]>([]);
   const [activeSession, setActiveSession] = useState<string>("");
+  const [isUnlimited, setIsUnlimited] = useState<boolean>(false);
+  const [planName, setPlanName] = useState<string>("Kuota User Gratis");
 
   useEffect(() => {
     const sync = () => {
@@ -53,6 +55,16 @@ export default function PokoDashboardPage() {
     };
     sync();
     window.addEventListener("pokobot-waha-updated", sync);
+
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((me) => {
+        if (me?.user?.isUnlimited || me?.plan?.isUnlimited) {
+          setIsUnlimited(true);
+          setPlanName(me?.user?.plan || "Enterprise Unlimited");
+        }
+      })
+      .catch(() => {});
 
     fetch("/api/waha?action=sessions", { cache: "no-store" })
       .then((r) => r.json())
@@ -112,9 +124,9 @@ export default function PokoDashboardPage() {
     },
     {
       title: "Sisa Kuota AI",
-      value: "50",
-      unit: "Credits",
-      change: "Kuota User Gratis",
+      value: isUnlimited ? "Unlimited" : "50",
+      unit: isUnlimited ? "Tanpa Batas" : "Credits",
+      change: isUnlimited ? `Paket ${planName}` : "Kuota User Gratis",
       changeType: "positive",
       icon: Zap,
       iconBg: "bg-amber-50 text-amber-600 border-amber-200",

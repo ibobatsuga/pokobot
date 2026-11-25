@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PokoAppShell } from "@/components/PokoAppShell";
 import {
   CreditCard,
@@ -15,6 +15,20 @@ import {
 
 export default function BillingPage() {
   const [selectedAmount, setSelectedAmount] = useState("500000");
+  const [isUnlimited, setIsUnlimited] = useState(false);
+  const [planName, setPlanName] = useState("Paket Gratis (50 Credits)");
+
+  useEffect(() => {
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((me) => {
+        if (me?.user?.isUnlimited || me?.plan?.isUnlimited) {
+          setIsUnlimited(true);
+          setPlanName(`Paket ${me?.user?.plan || "Enterprise Unlimited"}`);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const packages = [
     { amount: "100000", label: "Rp 100.000", bonus: "500 Kuota AI" },
@@ -42,18 +56,22 @@ export default function BillingPage() {
         <div className="p-7 rounded-3xl bg-poko-linen border border-stone-300/60 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider block mb-1">
-              Sisa Saldo & Kuota AI Gratis
+              {isUnlimited ? "Status Paket & Kuota Enterprise" : "Sisa Saldo & Kuota AI Gratis"}
             </span>
-            <h2 className="text-3xl font-bold text-poko-charcoal">50 Credits</h2>
+            <h2 className="text-3xl font-bold text-poko-charcoal">
+              {isUnlimited ? "Unlimited Credits" : "50 Credits"}
+            </h2>
             <p className="text-xs text-stone-600 mt-1">
-              Saldo Kredit Gratis (50 Credits) — siap untuk pengujian &amp; pesan awal
+              {isUnlimited
+                ? "Kuota Percakapan AI, Kirim Pesan/File/Gambar, Broadcast & Multi-Device Tanpa Batas (Unlimited)"
+                : "Saldo Kredit Gratis (50 Credits) — siap untuk pengujian & pesan awal"}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <span className="px-3 py-1.5 rounded-full bg-white text-emerald-800 text-xs font-bold border border-emerald-200 flex items-center gap-1.5 shadow-xs">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              Paket Gratis (50 Credits)
+              {planName}
             </span>
           </div>
         </div>

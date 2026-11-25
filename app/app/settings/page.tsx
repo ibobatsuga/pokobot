@@ -353,8 +353,13 @@ Header: Authorization (Bearer ${personalKey})`;
                 {[
                   {
                     name: "pokobot_send_whatsapp_message",
-                    desc: "Kirim pesan teks atau media via WhatsApp ke nomor tujuan melalui instance WAHA.",
+                    desc: "Kirim pesan teks via WhatsApp ke nomor tujuan melalui instance WAHA.",
                     params: "phone, message, session",
+                  },
+                  {
+                    name: "pokobot_send_whatsapp_file",
+                    desc: "Kirim file dokumen (PDF, DOCX, XLSX, ZIP) atau gambar/foto (JPG, PNG, WebP) beserta caption ke nomor WhatsApp.",
+                    params: "phone, fileUrl, mimetype, filename, caption, session",
                   },
                   {
                     name: "pokobot_get_chats",
